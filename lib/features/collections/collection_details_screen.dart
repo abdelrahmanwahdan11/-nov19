@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
 
 import '../../core/constants/app_assets.dart';
+import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
+import 'widgets/task_composer.dart';
 
 class CollectionDetailsScreen extends StatefulWidget {
   const CollectionDetailsScreen({super.key, required this.collectionId});
@@ -25,13 +27,17 @@ class _CollectionDetailsScreenState extends State<CollectionDetailsScreen> with 
   @override
   Widget build(BuildContext context) {
     final localization = AppLocalizations.of(context);
-    final collection = DummyData.collections.firstWhere((c) => c.id == widget.collectionId);
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: NestedScrollView(
-        headerSliverBuilder: (_, __) {
-          return [
-            SliverAppBar(
+    final collectionsController = AppScope.of(context).collectionsController;
+    return AnimatedBuilder(
+      animation: collectionsController,
+      builder: (context, _) {
+        final collection = collectionsController.byId(widget.collectionId);
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: NestedScrollView(
+            headerSliverBuilder: (_, __) {
+              return [
+                SliverAppBar(
               expandedHeight: 320,
               pinned: true,
               flexibleSpace: FlexibleSpaceBar(
@@ -120,11 +126,13 @@ class _CollectionDetailsScreenState extends State<CollectionDetailsScreen> with 
           controller: tabController,
           children: [
             _SummaryTab(collection: collection),
-            _TasksTab(collection: collection),
+            _TasksTab(collectionId: collection.id),
             _MediaTab(collection: collection),
           ],
         ),
       ),
+    );
+      },
     );
   }
 }
@@ -196,76 +204,60 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _TasksTab extends StatefulWidget {
-  const _TasksTab({required this.collection});
-  final CollectionModel collection;
-
-  @override
-  State<_TasksTab> createState() => _TasksTabState();
-}
-
-class _TasksTabState extends State<_TasksTab> {
-  late List<TaskModel> tasks;
-
-  @override
-  void initState() {
-    super.initState();
-    tasks = widget.collection.tasks;
-  }
+class _TasksTab extends StatelessWidget {
+  const _TasksTab({required this.collectionId});
+  final String collectionId;
 
   @override
   Widget build(BuildContext context) {
     final localization = AppLocalizations.of(context);
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        if (tasks.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 40),
-            child: Text(localization.t('tasksEmpty'), textAlign: TextAlign.center),
-          )
-        else
-          ...tasks.map(
-            (task) => Card(
-              child: ListTile(
-                leading: CircleAvatar(child: Text(task.assignee.characters.first)),
-                title: Text(task.title),
-                subtitle: Text(task.subtitle),
-                trailing: Checkbox(
-                  value: task.completed,
-                  onChanged: (value) {
-                    setState(() {
-                      tasks = tasks
-                          .map((e) => e.id == task.id ? e.copyWith(completed: value ?? false) : e)
-                          .toList();
-                    });
-                  },
+    final controller = AppScope.of(context).collectionsController;
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        final tasks = controller.tasksFor(collectionId);
+        return ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            TextButton.icon(
+              onPressed: () => Navigator.of(context).pushNamed('/collection_tasks', arguments: collectionId),
+              icon: const Icon(IconlyLight.calendar),
+              label: Text(localization.t('seeFullSchedule')),
+            ),
+            const SizedBox(height: 12),
+            if (tasks.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: Text(localization.t('tasksEmpty'), textAlign: TextAlign.center),
+              )
+            else
+              ...tasks.map(
+                (task) => Card(
+                  child: ListTile(
+                    leading: CircleAvatar(child: Text(task.assignee.characters.first)),
+                    title: Text(task.title),
+                    subtitle: Text('${task.subtitle}\n${_formatDate(task.date)}'),
+                    isThreeLine: true,
+                    trailing: Checkbox(
+                      value: task.completed,
+                      onChanged: (value) => controller.toggleTask(collectionId, task.id, value ?? false),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-        const SizedBox(height: 16),
-        ElevatedButton.icon(
-          onPressed: () {
-            setState(() {
-              tasks = [
-                ...tasks,
-                TaskModel(
-                  id: DateTime.now().toIso8601String(),
-                  title: localization.t('newTask'),
-                  subtitle: localization.t('localAddition'),
-                  date: DateTime.now(),
-                  assignee: 'AI',
-                )
-              ];
-            });
-          },
-          icon: const Icon(IconlyLight.plus),
-          label: Text(localization.t('addTask')),
-        )
-      ],
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () => showTaskComposer(context, collectionId),
+              icon: const Icon(IconlyLight.plus),
+              label: Text(localization.t('addTask')),
+            )
+          ],
+        );
+      },
     );
   }
+
+  String _formatDate(DateTime date) => '${date.day}/${date.month} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 }
 
 class _MediaTab extends StatelessWidget {

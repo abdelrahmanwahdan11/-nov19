@@ -25,4 +25,11 @@ class GalleryController extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  void toggleFavourite(String id) {
+    DummyData.gallery = DummyData.gallery
+        .map((item) => item.id == id ? item.copyWith(isFavourite: !item.isFavourite) : item)
+        .toList();
+    filterBy(_filter);
+  }
 }

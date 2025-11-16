@@ -24,6 +24,7 @@ class CatalogScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TextField(
                       decoration: InputDecoration(
@@ -49,6 +50,64 @@ class CatalogScreen extends StatelessWidget {
                           icon: Icon(controller.isGrid ? Icons.grid_view : Icons.list),
                           onPressed: controller.toggleView,
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: ['All', 'Trip', 'Party', 'Anniversary']
+                            .map(
+                              (type) => Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: ChoiceChip(
+                                  label: Text(type == 'All'
+                                      ? localization.t('galleryFilterAll')
+                                      : type == 'Trip'
+                                          ? localization.t('upcomingTrip')
+                                          : type == 'Party'
+                                              ? localization.t('partyEvent')
+                                              : localization.t('anniversary')),
+                                  selected: controller.typeFilter == type,
+                                  onSelected: (_) => controller.filterType(type),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: [
+                        FilterChip(
+                          selected: controller.favouriteOnly,
+                          label: Text(localization.t('favouriteOnly')),
+                          onSelected: controller.toggleFavouriteOnly,
+                        ),
+                        FilterChip(
+                          selected: controller.dateRange != null,
+                          label: Text(controller.dateRange == null
+                              ? localization.t('dateFilter')
+                              : '${controller.dateRange!.start.month}/${controller.dateRange!.start.day} - ${controller.dateRange!.end.month}/${controller.dateRange!.end.day}'),
+                          onSelected: (_) async {
+                            final range = await showDateRangePicker(
+                              context: context,
+                              firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                              lastDate: DateTime.now().add(const Duration(days: 365)),
+                              initialDateRange: controller.dateRange,
+                            );
+                            controller.updateDateRange(range);
+                          },
+                          avatar: const Icon(IconlyLight.calendar, size: 16),
+                        ),
+                        if (controller.dateRange != null)
+                          TextButton.icon(
+                            onPressed: () => controller.updateDateRange(null),
+                            icon: const Icon(Icons.clear),
+                            label: Text(localization.t('clear')),
+                          ),
                       ],
                     )
                   ],

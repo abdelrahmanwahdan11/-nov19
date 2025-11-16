@@ -24,7 +24,7 @@ class CollectionModel {
   final bool isFavourite;
   final List<TaskModel> tasks;
 
-  CollectionModel copyWith({bool? isFavourite}) => CollectionModel(
+  CollectionModel copyWith({bool? isFavourite, List<TaskModel>? tasks}) => CollectionModel(
         id: id,
         title: title,
         description: description,
@@ -33,7 +33,7 @@ class CollectionModel {
         location: location,
         images: images,
         isFavourite: isFavourite ?? this.isFavourite,
-        tasks: tasks,
+        tasks: tasks ?? this.tasks,
       );
 }
 
@@ -54,12 +54,13 @@ class TaskModel {
   final String assignee;
   final bool completed;
 
-  TaskModel copyWith({bool? completed}) => TaskModel(
+  TaskModel copyWith({bool? completed, DateTime? date, String? title, String? subtitle, String? assignee}) =>
+      TaskModel(
         id: id,
-        title: title,
-        subtitle: subtitle,
-        date: date,
-        assignee: assignee,
+        title: title ?? this.title,
+        subtitle: subtitle ?? this.subtitle,
+        date: date ?? this.date,
+        assignee: assignee ?? this.assignee,
         completed: completed ?? this.completed,
       );
 }
@@ -80,6 +81,15 @@ class GalleryItem {
   final String description;
   final String collectionId;
   final bool isFavourite;
+
+  GalleryItem copyWith({bool? isFavourite}) => GalleryItem(
+        id: id,
+        image: image,
+        title: title,
+        description: description,
+        collectionId: collectionId,
+        isFavourite: isFavourite ?? this.isFavourite,
+      );
 }
 
 class DummyData {
@@ -97,7 +107,7 @@ class DummyData {
         'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=400&q=80',
       ],
       isFavourite: true,
-      tasks: const [
+      tasks: [
         TaskModel(
           id: 't1',
           title: 'Book Jeeps',
@@ -126,6 +136,22 @@ class DummyData {
         'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80',
         'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=400&q=80',
       ],
+      tasks: [
+        TaskModel(
+          id: 't3',
+          title: 'Confirm band set list',
+          subtitle: 'Share favourite songs with trio',
+          date: DateTime.now().add(Duration(days: 10)),
+          assignee: 'Maya',
+        ),
+        TaskModel(
+          id: 't4',
+          title: 'Finalize projection mapping',
+          subtitle: 'Send updated storyboards',
+          date: DateTime.now().add(Duration(days: 12)),
+          assignee: 'Yousef',
+        ),
+      ],
     ),
     CollectionModel(
       id: 'c3',
@@ -138,6 +164,22 @@ class DummyData {
       images: const [
         'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80',
         'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=600&q=80',
+      ],
+      tasks: [
+        TaskModel(
+          id: 't5',
+          title: 'Secure rooftop permit',
+          subtitle: 'Send documents to municipality',
+          date: DateTime.now().add(Duration(days: 1)),
+          assignee: 'Hani',
+        ),
+        TaskModel(
+          id: 't6',
+          title: 'Sync DJs playlist',
+          subtitle: 'Finalize set order and visuals cues',
+          date: DateTime.now().add(Duration(days: 2)),
+          assignee: 'Layth',
+        ),
       ],
     ),
   ];
@@ -164,6 +206,20 @@ class DummyData {
       title: 'Dance floor',
       description: 'Holographic vibes for rooftop party.',
       collectionId: 'c3',
+    ),
+    GalleryItem(
+      id: 'g4',
+      image: 'https://images.unsplash.com/photo-1470229538611-16ba8c7ffbd7?auto=format&fit=crop&w=900&q=80',
+      title: 'Botanical dinner',
+      description: 'Verdant setup for anniversary dinner.',
+      collectionId: 'c2',
+    ),
+    GalleryItem(
+      id: 'g5',
+      image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80',
+      title: 'Secret map',
+      description: 'Location scouting snapshot.',
+      collectionId: 'c1',
     ),
   ];
 

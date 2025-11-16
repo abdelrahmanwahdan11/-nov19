@@ -15,6 +15,7 @@ import 'features/catalog/catalog_screen.dart';
 import 'features/collections/collection_create_screen.dart';
 import 'features/collections/collection_details_screen.dart';
 import 'features/collections/collections_screen.dart';
+import 'features/collections/task_schedule_screen.dart';
 import 'features/compare/compare_screen.dart';
 import 'features/gallery/gallery_screen.dart';
 import 'features/home/home_shell.dart';
@@ -104,6 +105,11 @@ class _NuviqAppState extends State<NuviqApp> {
                 );
               case '/collection_create':
                 return MaterialPageRoute(builder: (_) => const CollectionCreateScreen());
+              case '/collection_tasks':
+                final id = settings.arguments as String?;
+                return MaterialPageRoute(
+                  builder: (_) => TaskScheduleScreen(collectionId: id ?? 'c1'),
+                );
               case '/gallery':
                 return MaterialPageRoute(builder: (_) => const GalleryScreen());
               case '/catalog':

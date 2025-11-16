@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
 
 class FloatingNavBar extends StatelessWidget {
-  const FloatingNavBar({super.key, required this.currentIndex, required this.onTap});
+  const FloatingNavBar({super.key, required this.currentIndex, required this.onTap, this.reduceMotion = false});
 
   final int currentIndex;
   final ValueChanged<int> onTap;
+  final bool reduceMotion;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +33,7 @@ class FloatingNavBar extends StatelessWidget {
           return GestureDetector(
             onTap: () => onTap(index),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
+              duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 250),
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: active ? color.withOpacity(0.15) : Colors.transparent,

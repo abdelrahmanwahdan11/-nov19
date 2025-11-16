@@ -93,12 +93,32 @@ class _GalleryScreenState extends State<GalleryScreen> {
                                       ),
                                     ),
                                     Positioned(
+                                      top: 8,
+                                      right: 8,
+                                      child: IconButton(
+                                        onPressed: () => controller.toggleFavourite(item.id),
+                                        icon: Icon(
+                                          item.isFavourite ? IconlyBold.heart : IconlyLight.heart,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
                                       bottom: 16,
                                       left: 16,
                                       right: 16,
-                                      child: Text(
-                                        item.title,
-                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item.title,
+                                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                          ),
+                                          Text(
+                                            '${localization.t('linkedTo')}: ${item.collectionId}',
+                                            style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
@@ -182,6 +202,17 @@ class _GalleryScreenState extends State<GalleryScreen> {
                                       Text(selectedItem!.title,
                                           style: Theme.of(context).textTheme.headlineSmall),
                                       Text(selectedItem!.description),
+                                      const SizedBox(height: 12),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(IconlyLight.heart, size: 16),
+                                          const SizedBox(width: 6),
+                                          Text(selectedItem!.isFavourite
+                                              ? localization.t('favourites')
+                                              : localization.t('galleryFilterAll')),
+                                        ],
+                                      ),
                                     ],
                                   ),
                           ),

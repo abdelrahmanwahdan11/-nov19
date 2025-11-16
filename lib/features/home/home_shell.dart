@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/controllers/app_scope.dart';
 import '../../core/widgets/floating_nav_bar.dart';
 import '../collections/collections_screen.dart';
 import '../gallery/gallery_screen.dart';
@@ -22,15 +23,17 @@ class _HomeShellState extends State<HomeShell> {
       const CollectionsScreen(),
       const GalleryScreen(),
     ];
+    final reduceMotion = AppScope.of(context).settingsController.reduceAnimations;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 350),
+        duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 350),
         child: pages[_index],
       ),
       extendBody: true,
       bottomNavigationBar: FloatingNavBar(
         currentIndex: _index,
+        reduceMotion: reduceMotion,
         onTap: (value) {
           setState(() => _index = value);
         },

@@ -3,6 +3,7 @@ import 'package:iconly/iconly.dart';
 
 import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
+import '../../core/utils/dummy_data.dart';
 import '../../core/widgets/skeleton_box.dart';
 
 class CollectionsScreen extends StatefulWidget {
@@ -34,6 +35,12 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
     final localization = AppLocalizations.of(context);
     final controllers = AppScope.of(context);
     final collectionsController = controllers.collectionsController;
+    final labels = {
+      'All': localization.t('galleryFilterAll'),
+      'Trip': localization.t('upcomingTrip'),
+      'Party': localization.t('partyEvent'),
+      'Anniversary': localization.t('anniversary'),
+    };
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
@@ -67,12 +74,6 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
                   onChanged: collectionsController.search,
                 ),
                 const SizedBox(height: 16),
-                final labels = {
-                  'All': localization.t('galleryFilterAll'),
-                  'Trip': localization.t('upcomingTrip'),
-                  'Party': localization.t('partyEvent'),
-                  'Anniversary': localization.t('anniversary'),
-                };
                 Wrap(
                   spacing: 12,
                   children: tabs
