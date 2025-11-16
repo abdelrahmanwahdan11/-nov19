@@ -56,6 +56,37 @@ class CollectionsController extends ChangeNotifier {
   List<LogisticItemModel> logisticsFor(String id) => byId(id).logistics;
   List<BudgetLineModel> budgetLinesFor(String id) => byId(id).budgetLines;
   List<DocumentModel> documentsFor(String id) => byId(id).documents;
+  List<MemoryHighlightModel> memoriesForCollection(String id) =>
+      DummyData.memories.where((element) => element.collectionId == id).toList();
+
+  List<MemoryHighlightModel> latestMemories([int take = 5]) {
+    final ordered = [...DummyData.memories]..sort((a, b) => b.date.compareTo(a.date));
+    return ordered.take(take).toList();
+  }
+
+  List<MemoryHighlightModel> memories({String query = '', JournalMood? mood}) {
+    Iterable<MemoryHighlightModel> items = DummyData.memories;
+    if (query.isNotEmpty) {
+      final lower = query.toLowerCase();
+      items = items.where((memory) =>
+          memory.title.toLowerCase().contains(lower) ||
+          memory.description.toLowerCase().contains(lower) ||
+          memory.location.toLowerCase().contains(lower));
+    }
+    if (mood != null) {
+      items = items.where((element) => element.mood == mood);
+    }
+    final sorted = [...items]..sort((a, b) => b.date.compareTo(a.date));
+    return sorted;
+  }
+
+  Map<JournalMood, int> memoryMoodSummary() {
+    final summary = {for (final mood in JournalMood.values) mood: 0};
+    for (final memory in DummyData.memories) {
+      summary[memory.mood] = (summary[memory.mood] ?? 0) + 1;
+    }
+    return summary;
+  }
 
   Map<GuestStatus, int> guestStatusSummary(String id) {
     final guests = guestsFor(id);
@@ -193,6 +224,20 @@ class CollectionsController extends ChangeNotifier {
 
   int get completedTasksCount => DummyData.collections
       .fold(0, (previousValue, element) => previousValue + element.tasks.where((task) => task.completed).length);
+
+  void toggleMemoryFavourite(String id) {
+    final index = DummyData.memories.indexWhere((element) => element.id == id);
+    if (index == -1) return;
+    final memory = DummyData.memories[index];
+    DummyData.memories[index] = memory.copyWith(isFavourite: !memory.isFavourite);
+    notifyListeners();
+  }
+
+  Future<void> refreshMemories() async {
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    DummyData.memories.shuffle();
+    notifyListeners();
+  }
 
   Future<void> refresh() async {
     _isLoading = true;

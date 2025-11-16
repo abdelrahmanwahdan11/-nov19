@@ -109,6 +109,51 @@ class DocumentModel {
       );
 }
 
+class MemoryHighlightModel {
+  const MemoryHighlightModel({
+    required this.id,
+    required this.collectionId,
+    required this.title,
+    required this.description,
+    required this.date,
+    required this.image,
+    required this.location,
+    this.mood = JournalMood.excited,
+    this.isFavourite = false,
+  });
+
+  final String id;
+  final String collectionId;
+  final String title;
+  final String description;
+  final DateTime date;
+  final String image;
+  final String location;
+  final JournalMood mood;
+  final bool isFavourite;
+
+  MemoryHighlightModel copyWith({
+    String? title,
+    String? description,
+    DateTime? date,
+    String? image,
+    String? location,
+    JournalMood? mood,
+    bool? isFavourite,
+  }) =>
+      MemoryHighlightModel(
+        id: id,
+        collectionId: collectionId,
+        title: title ?? this.title,
+        description: description ?? this.description,
+        date: date ?? this.date,
+        image: image ?? this.image,
+        location: location ?? this.location,
+        mood: mood ?? this.mood,
+        isFavourite: isFavourite ?? this.isFavourite,
+      );
+}
+
 class CollectionModel {
   CollectionModel({
     required this.id,
@@ -486,6 +531,69 @@ class NuviqNotification {
 }
 
 class DummyData {
+  static List<MemoryHighlightModel> memories = [
+    MemoryHighlightModel(
+      id: 'mem1',
+      collectionId: 'c1',
+      title: 'Golden dunes rehearsal',
+      description: 'Team hiked to the ridge before dawn to rehearse the drum cue.',
+      date: DateTime.now().subtract(const Duration(days: 1, hours: 3)),
+      image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=900&q=80',
+      location: 'Dubai desert gate',
+      mood: JournalMood.excited,
+    ),
+    MemoryHighlightModel(
+      id: 'mem2',
+      collectionId: 'c2',
+      title: 'Lantern sketches',
+      description: 'Sara mocked up floating lantern paths for the anniversary entrance.',
+      date: DateTime.now().subtract(const Duration(days: 3)),
+      image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80',
+      location: 'Alserkal studio',
+      mood: JournalMood.calm,
+    ),
+    MemoryHighlightModel(
+      id: 'mem3',
+      collectionId: 'c3',
+      title: 'Rooftop string test',
+      description: 'First look at the rooftop stage with the quartet warming up.',
+      date: DateTime.now().subtract(const Duration(days: 5)),
+      image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80',
+      location: 'Downtown terrace',
+      mood: JournalMood.focused,
+    ),
+    MemoryHighlightModel(
+      id: 'mem4',
+      collectionId: 'c2',
+      title: 'Garden tasting',
+      description: 'Guests sampled the botanical dessert flight during rehearsal night.',
+      date: DateTime.now().subtract(const Duration(days: 2, hours: 5)),
+      image: 'https://images.unsplash.com/photo-1498654896293-37aacf113fd9?auto=format&fit=crop&w=900&q=80',
+      location: 'Secret garden venue',
+      mood: JournalMood.excited,
+    ),
+    MemoryHighlightModel(
+      id: 'mem5',
+      collectionId: 'c1',
+      title: 'Camel caravan arrival',
+      description: 'Final rehearsal with camel convoy glowing under portable lanterns.',
+      date: DateTime.now().subtract(const Duration(days: 7)),
+      image: 'https://images.unsplash.com/photo-1432117068802-b224427256a5?auto=format&fit=crop&w=900&q=80',
+      location: 'North ridge',
+      mood: JournalMood.excited,
+    ),
+    MemoryHighlightModel(
+      id: 'mem6',
+      collectionId: 'c3',
+      title: 'Seaside rehearsal',
+      description: 'Choir lined up next to the pier just before sunset to test acoustics.',
+      date: DateTime.now().subtract(const Duration(days: 4)),
+      image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80',
+      location: 'La Mer pier',
+      mood: JournalMood.calm,
+    ),
+  ];
+
   static List<CollectionModel> collections = [
     CollectionModel(
       id: 'c1',

@@ -33,6 +33,7 @@ class HomeScreen extends StatelessWidget {
         ];
         final timeline = controllers.collectionsController.upcomingTimeline(4);
         final highlights = controllers.collectionsController.recentJournalEntries();
+        final memoryPeek = controllers.collectionsController.latestMemories(4);
         final totalBudgetPlanned = controllers.collectionsController.totalBudgetPlanned;
         final totalBudgetUsed = controllers.collectionsController.totalBudgetUsed;
         final budgetProgress = totalBudgetPlanned == 0
@@ -493,6 +494,38 @@ class HomeScreen extends StatelessWidget {
                     itemBuilder: (_, index) {
                       final item = highlights[index];
                       return _JournalHighlightCard(entry: item);
+                    },
+                  ),
+                ),
+              ],
+              if (memoryPeek.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(localization.t('latestMemories'),
+                          style: Theme.of(context).textTheme.titleMedium),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pushNamed('/memories'),
+                      child: Text(localization.t('openMemories')),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 220,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: memoryPeek.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (_, index) {
+                      final memory = memoryPeek[index];
+                      final collection = controllers.collectionsController.byId(memory.collectionId);
+                      return _MemoryPeekCard(
+                        memory: memory,
+                        collection: collection,
+                      );
                     },
                   ),
                 ),
@@ -1495,6 +1528,66 @@ class _JournalHighlightCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text('${journal.date.day}/${journal.date.month}',
+                    style: Theme.of(context).textTheme.labelSmall),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _moodLabel(AppLocalizations localization, JournalMood mood) {
+    switch (mood) {
+      case JournalMood.calm:
+        return localization.t('moodCalm');
+      case JournalMood.focused:
+        return localization.t('moodFocused');
+      default:
+        return localization.t('moodExcited');
+    }
+  }
+}
+
+class _MemoryPeekCard extends StatelessWidget {
+  const _MemoryPeekCard({required this.memory, required this.collection});
+
+  final MemoryHighlightModel memory;
+  final CollectionModel collection;
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context);
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pushNamed('/memories'),
+      child: Container(
+        width: 220,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          color: Theme.of(context).cardTheme.color,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Image.network(memory.image, height: 110, width: double.infinity, fit: BoxFit.cover),
+            ),
+            const SizedBox(height: 8),
+            Text(collection.title, style: Theme.of(context).textTheme.labelSmall),
+            Text(memory.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Text(memory.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+            const Spacer(),
+            Row(
+              children: [
+                Chip(label: Text(_moodLabel(localization, memory.mood))),
+                const Spacer(),
+                Text('${memory.date.day}/${memory.date.month}',
                     style: Theme.of(context).textTheme.labelSmall),
               ],
             )
