@@ -142,5 +142,20 @@
   "todayMood": "متتبع المزاج",
   "latestHighlights": "أحدث اللحظات",
   "openJournal": "افتح المذكرات",
-  "title": "العنوان"
+  "title": "العنوان",
+  "openInsights": "افتح لوحة الرؤى",
+  "insightsDeepDive": "لوحة التحليلات",
+  "overallCompletion": "نسبة الإنجاز العامة",
+  "moodPulse": "نبض المزاج",
+  "spendingByType": "الإنفاق حسب النوع",
+  "eventDistribution": "مزيج الفعاليات",
+  "collectionsAttention": "تحتاج اهتماماً",
+  "collectionsLeaders": "قادة الزخم",
+  "insightsTimeline": "خط الزمن الموسع",
+  "insightsAllGood": "كل شيء يبدو صحياً",
+  "insightsNoLeaders": "أضف المزيد من المهام لرؤية القادة",
+  "daysLeft": "باق %d يوم",
+  "todayLabel": "اليوم",
+  "completionLabel": "اكتمال المهام",
+  "budgetPressureLabel": "ضغط الميزانية"
 }

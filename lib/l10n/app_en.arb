@@ -142,5 +142,20 @@
   "todayMood": "Mood tracker",
   "latestHighlights": "Latest highlights",
   "openJournal": "Open journal",
-  "title": "Title"
+  "title": "Title",
+  "openInsights": "Open insights",
+  "insightsDeepDive": "Insights dashboard",
+  "overallCompletion": "Overall completion",
+  "moodPulse": "Mood pulse",
+  "spendingByType": "Spending by type",
+  "eventDistribution": "Event mix",
+  "collectionsAttention": "Needs attention",
+  "collectionsLeaders": "Momentum leaders",
+  "insightsTimeline": "Extended timeline",
+  "insightsAllGood": "Everything looks healthy",
+  "insightsNoLeaders": "Add more tasks to highlight progress",
+  "daysLeft": "%d days left",
+  "todayLabel": "Today",
+  "completionLabel": "Task completion",
+  "budgetPressureLabel": "Budget pressure"
 }

@@ -21,6 +21,7 @@ import 'features/collections/task_schedule_screen.dart';
 import 'features/compare/compare_screen.dart';
 import 'features/gallery/gallery_screen.dart';
 import 'features/home/home_shell.dart';
+import 'features/home/insights_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/settings/settings_screen.dart';
 
@@ -98,6 +99,8 @@ class _NuviqAppState extends State<NuviqApp> {
                 return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
               case '/home':
                 return MaterialPageRoute(builder: (_) => const HomeShell());
+              case '/insights':
+                return MaterialPageRoute(builder: (_) => const InsightsScreen());
               case '/collections':
                 return MaterialPageRoute(builder: (_) => const CollectionsScreen());
               case '/collection_details':

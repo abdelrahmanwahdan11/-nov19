@@ -150,7 +150,18 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Text(localization.t('insightsTitle'), style: Theme.of(context).textTheme.titleMedium),
+              Row(
+                children: [
+                  Expanded(
+                    child:
+                        Text(localization.t('insightsTitle'), style: Theme.of(context).textTheme.titleMedium),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pushNamed('/insights'),
+                    child: Text(localization.t('openInsights')),
+                  )
+                ],
+              ),
               const SizedBox(height: 12),
               SizedBox(
                 height: 110,

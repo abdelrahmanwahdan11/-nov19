@@ -57,10 +57,72 @@ class CollectionsController extends ChangeNotifier {
     return (collection.budgetUsed / collection.budgetPlanned).clamp(0, 1);
   }
 
+  double completionRate(String id) {
+    final tasks = tasksFor(id);
+    if (tasks.isEmpty) return 0;
+    final completed = tasks.where((task) => task.completed).length;
+    return completed / tasks.length;
+  }
+
+  double get overallCompletionRate {
+    final tasks = DummyData.collections.expand((collection) => collection.tasks).toList();
+    if (tasks.isEmpty) return 0;
+    final completed = tasks.where((task) => task.completed).length;
+    return completed / tasks.length;
+  }
+
+  Map<String, double> spendingByType() {
+    final Map<String, double> spending = {};
+    for (final collection in DummyData.collections) {
+      spending.update(collection.type, (value) => value + collection.budgetUsed,
+          ifAbsent: () => collection.budgetUsed);
+    }
+    return spending;
+  }
+
+  Map<JournalMood, int> overallMoodSummary() {
+    final map = {for (final mood in JournalMood.values) mood: 0};
+    for (final collection in DummyData.collections) {
+      for (final entry in collection.journalEntries) {
+        map[entry.mood] = (map[entry.mood] ?? 0) + 1;
+      }
+    }
+    return map;
+  }
+
+  List<CollectionModel> collectionsNeedingAttention([int take = 3]) {
+    final now = DateTime.now();
+    final sorted = [...DummyData.collections]
+      ..sort((a, b) => a.date.compareTo(b.date));
+    return sorted
+        .where((collection) {
+          final daysUntil = collection.date.difference(now).inDays;
+          final completion = completionRate(collection.id);
+          final budgetRatio = collection.budgetPlanned == 0
+              ? 0.0
+              : collection.budgetUsed / collection.budgetPlanned;
+          return (daysUntil <= 14 && completion < 0.6) || budgetRatio > 0.9;
+        })
+        .take(take)
+        .toList();
+  }
+
+  List<CollectionModel> leadingCollections([int take = 3]) {
+    final ranked = [...DummyData.collections]
+      ..sort((a, b) => completionRate(b.id).compareTo(completionRate(a.id)));
+    return ranked.take(take).toList();
+  }
+
   double get totalBudgetPlanned =>
       DummyData.collections.fold(0, (previousValue, element) => previousValue + element.budgetPlanned);
   double get totalBudgetUsed =>
       DummyData.collections.fold(0, (previousValue, element) => previousValue + element.budgetUsed);
+
+  int get totalTasksCount =>
+      DummyData.collections.fold(0, (previousValue, element) => previousValue + element.tasks.length);
+
+  int get completedTasksCount => DummyData.collections
+      .fold(0, (previousValue, element) => previousValue + element.tasks.where((task) => task.completed).length);
 
   Future<void> refresh() async {
     _isLoading = true;
