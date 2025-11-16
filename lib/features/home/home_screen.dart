@@ -6,6 +6,7 @@ import '../../core/constants/app_assets.dart';
 import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
+import '../../core/utils/itinerary_utils.dart';
 import '../../core/widgets/skeleton_box.dart';
 import 'widgets/notifications_sheet.dart';
 
@@ -38,6 +39,7 @@ class HomeScreen extends StatelessWidget {
             ? 0.0
             : (totalBudgetUsed / totalBudgetPlanned).clamp(0, 1);
         final milestonePeek = controllers.collectionsController.upcomingMilestones(3);
+        final itineraryPeek = controllers.collectionsController.upcomingItinerarySlots(4);
         final unread = controllers.notificationsController.unreadCount;
         return RefreshIndicator(
           onRefresh: controllers.collectionsController.refresh,
@@ -216,6 +218,30 @@ class HomeScreen extends StatelessWidget {
                       .toList(),
                 ),
               ],
+              if (itineraryPeek.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                        child: Text(localization.t('itineraryPeek'),
+                            style: Theme.of(context).textTheme.titleMedium)),
+                    TextButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed('/collection_itinerary', arguments: itineraryPeek.first.collection.id),
+                      child: Text(localization.t('openItinerary')),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Column(
+                  children: itineraryPeek
+                      .map((entry) => Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _ItinerarySnippetCard(entry: entry),
+                          ))
+                      .toList(),
+                ),
+              ],
               if (highlights.isNotEmpty) ...[
                 const SizedBox(height: 24),
                 Row(
@@ -341,9 +367,15 @@ class _CollectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context);
+    final controller = AppScope.of(context).collectionsController;
     final totalTasks = collection.tasks.length;
     final completed = collection.tasks.where((task) => task.completed).length;
     final progress = totalTasks == 0 ? 0.0 : completed / totalTasks;
+    final nextSlot = controller.nextItinerarySlot(collection.id);
+    final timeLabel = nextSlot == null
+        ? null
+        : MaterialLocalizations.of(context).formatTimeOfDay(nextSlot.slot.time);
     return GestureDetector(
       onTap: () => Navigator.of(context).pushNamed('/collection_details', arguments: collection.id),
       child: Container(
@@ -381,6 +413,29 @@ class _CollectionCard extends StatelessWidget {
                         Text('${(progress * 100).round()}% ${AppLocalizations.of(context).t('tasks')}'),
                       ],
                     ),
+                  if (nextSlot != null) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(IconlyLight.calendar, size: 16),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            '${timeLabel ?? ''} · ${nextSlot.slot.title}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context)
+                            .pushNamed('/collection_itinerary', arguments: collection.id),
+                        child: Text(localization.t('openItinerary')),
+                      ),
+                    )
+                  ],
                 ],
               ),
             )
@@ -462,6 +517,68 @@ class _TimelineTile extends StatelessWidget {
     final hour = date.hour.toString().padLeft(2, '0');
     final minute = date.minute.toString().padLeft(2, '0');
     return '${date.day}/${date.month} $hour:$minute';
+  }
+}
+
+class _ItinerarySnippetCard extends StatelessWidget {
+  const _ItinerarySnippetCard({required this.entry});
+
+  final ({
+    CollectionModel collection,
+    ItineraryDayModel day,
+    ItinerarySlotModel slot,
+    DateTime schedule,
+  }) entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context);
+    final timeLabel = MaterialLocalizations.of(context).formatTimeOfDay(entry.slot.time);
+    final dateLabel = MaterialLocalizations.of(context).formatMediumDate(entry.day.date);
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pushNamed('/collection_itinerary', arguments: entry.collection.id),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          color: Theme.of(context).cardTheme.color,
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundImage: NetworkImage(entry.collection.images.first),
+              radius: 28,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(entry.collection.title, style: Theme.of(context).textTheme.titleMedium),
+                  Text('${timeLabel} · ${entry.slot.title}'),
+                  Text(dateLabel, style: Theme.of(context).textTheme.labelSmall),
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      Chip(
+                        label: Text(localizedItineraryTag(entry.slot.tag, localization)),
+                        backgroundColor: Theme.of(context).primaryColor.withOpacity(0.15),
+                      ),
+                      Chip(
+                        label: Text(localization.t('itineraryUpcoming')),
+                        backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+            const Icon(IconlyLight.arrow_right_2),
+          ],
+        ),
+      ),
+    );
   }
 }
 

@@ -4,6 +4,7 @@ import 'package:iconly/iconly.dart';
 import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
+import '../../core/utils/itinerary_utils.dart';
 import '../../core/widgets/skeleton_box.dart';
 
 class CollectionsScreen extends StatefulWidget {
@@ -227,10 +228,15 @@ class _CollectionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = AppScope.of(context).collectionsController;
+    final localization = AppLocalizations.of(context);
     final progress = collection.budgetPlanned == 0
         ? 0.0
         : (collection.budgetUsed / collection.budgetPlanned).clamp(0, 1);
     final overBudget = collection.budgetUsed > collection.budgetPlanned;
+    final nextSlot = controller.nextItinerarySlot(collection.id);
+    final timeLabel = nextSlot == null
+        ? null
+        : MaterialLocalizations.of(context).formatTimeOfDay(nextSlot.slot.time);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -268,6 +274,43 @@ class _CollectionTile extends StatelessWidget {
                       .labelSmall
                       ?.copyWith(color: overBudget ? Colors.redAccent : null),
                 ),
+                if (nextSlot != null) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(IconlyLight.calendar, size: 16),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          '${timeLabel ?? ''} · ${nextSlot.slot.title}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      Chip(
+                        label: Text(localizedItineraryTag(nextSlot.slot.tag, localization)),
+                        backgroundColor: Theme.of(context).primaryColor.withOpacity(0.15),
+                      ),
+                      Chip(
+                        label: Text(localization.t('itineraryNextSlot')),
+                        backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                      ),
+                    ],
+                  ),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed('/collection_itinerary', arguments: collection.id),
+                      child: Text(localization.t('openItinerary')),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

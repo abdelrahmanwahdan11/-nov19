@@ -50,6 +50,7 @@ class CollectionsController extends ChangeNotifier {
   List<TaskModel> tasksFor(String id) => byId(id).tasks;
   List<MilestoneModel> milestonesFor(String id) => byId(id).milestones;
   List<JournalEntryModel> journalFor(String id) => byId(id).journalEntries;
+  List<ItineraryDayModel> itineraryFor(String id) => byId(id).itinerary;
 
   double budgetProgress(String id) {
     final collection = byId(id);
@@ -190,6 +191,17 @@ class CollectionsController extends ChangeNotifier {
     _replaceCollection(collection.copyWith(tasks: updatedTasks));
   }
 
+  void addItinerarySlot(String collectionId, String dayId, ItinerarySlotModel slot) {
+    final collection = byId(collectionId);
+    final updatedDays = collection.itinerary.map((day) {
+      if (day.id != dayId) return day;
+      final updatedSlots = [...day.slots, slot]
+        ..sort((a, b) => _timeToMinutes(a.time).compareTo(_timeToMinutes(b.time)));
+      return day.copyWith(slots: updatedSlots);
+    }).toList();
+    _replaceCollection(collection.copyWith(itinerary: updatedDays));
+  }
+
   void cycleMilestoneStatus(String collectionId, String milestoneId) {
     final collection = byId(collectionId);
     final updated = collection.milestones.map((milestone) {
@@ -289,6 +301,54 @@ class CollectionsController extends ChangeNotifier {
         .toList();
   }
 
+  List<({
+    CollectionModel collection,
+    ItineraryDayModel day,
+    ItinerarySlotModel slot,
+    DateTime schedule,
+  })> upcomingItinerarySlots([int take = 4]) {
+    final entries = <({
+      CollectionModel collection,
+      ItineraryDayModel day,
+      ItinerarySlotModel slot,
+      DateTime schedule,
+    })>[];
+    for (final collection in DummyData.collections) {
+      for (final day in collection.itinerary) {
+        for (final slot in day.slots) {
+          entries.add((
+            collection: collection,
+            day: day,
+            slot: slot,
+            schedule: _combine(day, slot),
+          ));
+        }
+      }
+    }
+    entries.sort((a, b) => a.schedule.compareTo(b.schedule));
+    return entries
+        .where((entry) => entry.schedule.isAfter(DateTime.now().subtract(const Duration(hours: 2))))
+        .take(take)
+        .toList();
+  }
+
+  ({ItineraryDayModel day, ItinerarySlotModel slot, DateTime schedule})?
+      nextItinerarySlot(String collectionId) {
+    final collection = byId(collectionId);
+    final slots = <({ItineraryDayModel day, ItinerarySlotModel slot, DateTime schedule})>[];
+    for (final day in collection.itinerary) {
+      for (final slot in day.slots) {
+        slots.add((day: day, slot: slot, schedule: _combine(day, slot)));
+      }
+    }
+    slots.sort((a, b) => a.schedule.compareTo(b.schedule));
+    final filtered = slots
+        .where((entry) => entry.schedule.isAfter(DateTime.now().subtract(const Duration(hours: 2))))
+        .toList();
+    if (filtered.isEmpty) return null;
+    return filtered.first;
+  }
+
   void _applyFilters() {
     _visible = DummyData.collections.where((collection) {
       final matchesQuery = collection.title.toLowerCase().contains(_query.toLowerCase()) ||
@@ -324,4 +384,9 @@ class CollectionsController extends ChangeNotifier {
         .toList();
     _applyFilters();
   }
+
+  DateTime _combine(ItineraryDayModel day, ItinerarySlotModel slot) =>
+      DateTime(day.date.year, day.date.month, day.date.day, slot.time.hour, slot.time.minute);
+
+  int _timeToMinutes(TimeOfDay time) => time.hour * 60 + time.minute;
 }

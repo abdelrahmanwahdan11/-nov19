@@ -1,5 +1,69 @@
 import 'package:flutter/material.dart';
+
 import '../constants/app_assets.dart';
+
+class ItineraryTags {
+  static const logistics = 'Logistics';
+  static const experience = 'Experience';
+  static const culinary = 'Culinary';
+  static const wellness = 'Wellness';
+  static const tech = 'Tech';
+}
+
+class ItinerarySlotModel {
+  const ItinerarySlotModel({
+    required this.id,
+    required this.title,
+    required this.note,
+    required this.time,
+    required this.tag,
+  });
+
+  final String id;
+  final String title;
+  final String note;
+  final TimeOfDay time;
+  final String tag;
+
+  ItinerarySlotModel copyWith({
+    String? title,
+    String? note,
+    TimeOfDay? time,
+    String? tag,
+  }) =>
+      ItinerarySlotModel(
+        id: id,
+        title: title ?? this.title,
+        note: note ?? this.note,
+        time: time ?? this.time,
+        tag: tag ?? this.tag,
+      );
+}
+
+class ItineraryDayModel {
+  const ItineraryDayModel({
+    required this.id,
+    required this.date,
+    required this.focus,
+    this.cover = '',
+    this.slots = const [],
+  });
+
+  final String id;
+  final DateTime date;
+  final String focus;
+  final String cover;
+  final List<ItinerarySlotModel> slots;
+
+  ItineraryDayModel copyWith({String? focus, List<ItinerarySlotModel>? slots}) =>
+      ItineraryDayModel(
+        id: id,
+        date: date,
+        focus: focus ?? this.focus,
+        cover: cover,
+        slots: slots ?? this.slots,
+      );
+}
 
 class CollectionModel {
   CollectionModel({
@@ -16,6 +80,7 @@ class CollectionModel {
     this.isFavourite = false,
     this.tasks = const [],
     this.journalEntries = const [],
+    this.itinerary = const [],
   });
 
   final String id;
@@ -31,6 +96,7 @@ class CollectionModel {
   final bool isFavourite;
   final List<TaskModel> tasks;
   final List<JournalEntryModel> journalEntries;
+  final List<ItineraryDayModel> itinerary;
 
   CollectionModel copyWith({
     bool? isFavourite,
@@ -39,6 +105,7 @@ class CollectionModel {
     double? budgetUsed,
     List<MilestoneModel>? milestones,
     List<JournalEntryModel>? journalEntries,
+    List<ItineraryDayModel>? itinerary,
   }) =>
       CollectionModel(
         id: id,
@@ -54,6 +121,7 @@ class CollectionModel {
         isFavourite: isFavourite ?? this.isFavourite,
         tasks: tasks ?? this.tasks,
         journalEntries: journalEntries ?? this.journalEntries,
+        itinerary: itinerary ?? this.itinerary,
       );
 }
 
@@ -257,6 +325,68 @@ class DummyData {
           image: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=900&q=80',
         ),
       ],
+      itinerary: [
+        ItineraryDayModel(
+          id: 'c1d1',
+          date: DateTime.now().add(const Duration(days: 5)),
+          focus: 'Convoy warm-up',
+          cover:
+              'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1000&q=80',
+          slots: [
+            ItinerarySlotModel(
+              id: 'c1s1',
+              time: const TimeOfDay(hour: 4, minute: 30),
+              title: 'Convoy meetup',
+              note: 'Load jeeps, hand radios, hydration check.',
+              tag: ItineraryTags.logistics,
+            ),
+            ItinerarySlotModel(
+              id: 'c1s2',
+              time: const TimeOfDay(hour: 5, minute: 45),
+              title: 'Dune ascent briefing',
+              note: 'Pilot shares sunrise anchor points.',
+              tag: ItineraryTags.tech,
+            ),
+            ItinerarySlotModel(
+              id: 'c1s3',
+              time: const TimeOfDay(hour: 7, minute: 0),
+              title: 'Bedouin breakfast',
+              note: 'Serve saffron pancakes + mint labneh.',
+              tag: ItineraryTags.culinary,
+            ),
+          ],
+        ),
+        ItineraryDayModel(
+          id: 'c1d2',
+          date: DateTime.now().add(const Duration(days: 6)),
+          focus: 'Desert wellness',
+          cover:
+              'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=60',
+          slots: [
+            ItinerarySlotModel(
+              id: 'c1s4',
+              time: const TimeOfDay(hour: 6, minute: 15),
+              title: 'Sunrise yoga',
+              note: 'Calm stretch with sand anchors.',
+              tag: ItineraryTags.wellness,
+            ),
+            ItinerarySlotModel(
+              id: 'c1s5',
+              time: const TimeOfDay(hour: 8, minute: 30),
+              title: 'Camel ride loop',
+              note: 'Split guests in two groups.',
+              tag: ItineraryTags.experience,
+            ),
+            ItinerarySlotModel(
+              id: 'c1s6',
+              time: const TimeOfDay(hour: 10, minute: 0),
+              title: 'Drone photo drop',
+              note: 'Capture hero shots + deliver via Airdrop booth.',
+              tag: ItineraryTags.tech,
+            ),
+          ],
+        ),
+      ],
     ),
     CollectionModel(
       id: 'c2',
@@ -325,6 +455,68 @@ class DummyData {
           date: DateTime.now().subtract(const Duration(days: 4)),
           mood: JournalMood.calm,
           image: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=900&q=80',
+        ),
+      ],
+      itinerary: [
+        ItineraryDayModel(
+          id: 'c2d1',
+          date: DateTime.now().add(const Duration(days: 18)),
+          focus: 'Arrival ritual',
+          cover:
+              'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=70',
+          slots: [
+            ItinerarySlotModel(
+              id: 'c2s1',
+              time: const TimeOfDay(hour: 17, minute: 0),
+              title: 'Guest welcome',
+              note: 'Acoustic foyer loop + scent diffusion.',
+              tag: ItineraryTags.experience,
+            ),
+            ItinerarySlotModel(
+              id: 'c2s2',
+              time: const TimeOfDay(hour: 18, minute: 30),
+              title: 'Projection reveal',
+              note: 'Sync lighting cues with trio bridge.',
+              tag: ItineraryTags.tech,
+            ),
+            ItinerarySlotModel(
+              id: 'c2s3',
+              time: const TimeOfDay(hour: 19, minute: 15),
+              title: 'Chef parade',
+              note: 'Slow walk plating to each table.',
+              tag: ItineraryTags.culinary,
+            ),
+          ],
+        ),
+        ItineraryDayModel(
+          id: 'c2d2',
+          date: DateTime.now().add(const Duration(days: 19)),
+          focus: 'Intimate finale',
+          cover:
+              'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=60',
+          slots: [
+            ItinerarySlotModel(
+              id: 'c2s4',
+              time: const TimeOfDay(hour: 16, minute: 45),
+              title: 'Sound check',
+              note: 'Balance trio with projection hum.',
+              tag: ItineraryTags.tech,
+            ),
+            ItinerarySlotModel(
+              id: 'c2s5',
+              time: const TimeOfDay(hour: 20, minute: 0),
+              title: 'Anniversary toast',
+              note: 'Lighting drop + curated story slides.',
+              tag: ItineraryTags.experience,
+            ),
+            ItinerarySlotModel(
+              id: 'c2s6',
+              time: const TimeOfDay(hour: 21, minute: 0),
+              title: 'Dessert garden',
+              note: 'Install edible flowers on mirrored trays.',
+              tag: ItineraryTags.culinary,
+            ),
+          ],
         ),
       ],
     ),
@@ -396,6 +588,68 @@ class DummyData {
           date: DateTime.now().subtract(const Duration(days: 1)),
           mood: JournalMood.focused,
           image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80',
+        ),
+      ],
+      itinerary: [
+        ItineraryDayModel(
+          id: 'c3d1',
+          date: DateTime.now().add(const Duration(days: 1)),
+          focus: 'Immersive prep',
+          cover:
+              'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1100&q=70',
+          slots: [
+            ItinerarySlotModel(
+              id: 'c3s1',
+              time: const TimeOfDay(hour: 14, minute: 0),
+              title: 'Rig load-in',
+              note: 'Haze calibration + LED focus.',
+              tag: ItineraryTags.tech,
+            ),
+            ItinerarySlotModel(
+              id: 'c3s2',
+              time: const TimeOfDay(hour: 17, minute: 0),
+              title: 'Secret DJ briefing',
+              note: 'Hand signal cues with visual artist.',
+              tag: ItineraryTags.logistics,
+            ),
+            ItinerarySlotModel(
+              id: 'c3s3',
+              time: const TimeOfDay(hour: 20, minute: 0),
+              title: 'Soft opening',
+              note: 'VIP sips + neon photo walk.',
+              tag: ItineraryTags.experience,
+            ),
+          ],
+        ),
+        ItineraryDayModel(
+          id: 'c3d2',
+          date: DateTime.now().add(const Duration(days: 2)),
+          focus: 'Party ignition',
+          cover:
+              'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=60',
+          slots: [
+            ItinerarySlotModel(
+              id: 'c3s4',
+              time: const TimeOfDay(hour: 19, minute: 30),
+              title: 'Guest arrival drop',
+              note: 'AR invite scan + elevator reveal.',
+              tag: ItineraryTags.tech,
+            ),
+            ItinerarySlotModel(
+              id: 'c3s5',
+              time: const TimeOfDay(hour: 22, minute: 0),
+              title: 'AI photo booth',
+              note: 'Loop prompts + share to LED wall.',
+              tag: ItineraryTags.experience,
+            ),
+            ItinerarySlotModel(
+              id: 'c3s6',
+              time: const TimeOfDay(hour: 23, minute: 15),
+              title: 'Late-night shawarma bar',
+              note: 'Charcoal cart + secret sauces.',
+              tag: ItineraryTags.culinary,
+            ),
+          ],
         ),
       ],
     ),

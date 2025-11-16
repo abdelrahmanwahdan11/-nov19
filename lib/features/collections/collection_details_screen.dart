@@ -5,6 +5,7 @@ import '../../core/constants/app_assets.dart';
 import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
+import '../../core/utils/itinerary_utils.dart';
 import 'widgets/task_composer.dart';
 
 class CollectionDetailsScreen extends StatefulWidget {
@@ -74,6 +75,11 @@ class _CollectionDetailsScreenState extends State<CollectionDetailsScreen> with 
                                       .headlineSmall
                                       ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
                                 ),
+                              ),
+                              IconButton(
+                                icon: const Icon(IconlyLight.calendar, color: Colors.white),
+                                onPressed: () => Navigator.of(context)
+                                    .pushNamed('/collection_itinerary', arguments: collection.id),
                               ),
                               IconButton(
                                 icon: const Icon(IconlyLight.paper, color: Colors.white),
@@ -150,6 +156,7 @@ class _SummaryTab extends StatelessWidget {
         ? 0.0
         : (collection.budgetUsed / collection.budgetPlanned).clamp(0, 1);
     final remaining = (collection.budgetPlanned - collection.budgetUsed).clamp(0, collection.budgetPlanned);
+    final itinerary = collection.itinerary;
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
@@ -183,6 +190,26 @@ class _SummaryTab extends StatelessWidget {
             ],
           ),
         ),
+        if (itinerary.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(child: Text(localization.t('itineraryPeek'), style: Theme.of(context).textTheme.titleMedium)),
+              TextButton(
+                onPressed: () => Navigator.of(context)
+                    .pushNamed('/collection_itinerary', arguments: collection.id),
+                child: Text(localization.t('openItinerary')),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Column(
+            children: itinerary
+                .take(2)
+                .map((day) => _ItineraryPreviewCard(day: day))
+                .toList(),
+          ),
+        ],
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(20),
@@ -410,6 +437,54 @@ class _JournalPeekCard extends StatelessWidget {
       default:
         return localization.t('moodExcited');
     }
+  }
+}
+
+class _ItineraryPreviewCard extends StatelessWidget {
+  const _ItineraryPreviewCard({required this.day});
+
+  final ItineraryDayModel day;
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context);
+    final dateLabel = MaterialLocalizations.of(context).formatMediumDate(day.date);
+    final slots = day.slots.take(2).toList();
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: Theme.of(context).cardTheme.color,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(dateLabel, style: Theme.of(context).textTheme.labelMedium),
+          Text(day.focus, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          ...slots.map(
+            (slot) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Text(
+                    MaterialLocalizations.of(context).formatTimeOfDay(slot.time),
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(slot.title)),
+                  Chip(
+                    label: Text(localizedItineraryTag(slot.tag, localization)),
+                    backgroundColor: Theme.of(context).primaryColor.withOpacity(0.15),
+                  ),
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    );
   }
 }
 
