@@ -3,6 +3,7 @@ import 'package:iconly/iconly.dart';
 
 import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
+import '../../core/widgets/quick_settings_button.dart';
 import 'widgets/task_composer.dart';
 
 class TaskScheduleScreen extends StatelessWidget {
@@ -22,7 +23,8 @@ class TaskScheduleScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(IconlyLight.plus),
             onPressed: () => showTaskComposer(context, collectionId),
-          )
+          ),
+          const QuickSettingsButton(),
         ],
       ),
       body: AnimatedBuilder(

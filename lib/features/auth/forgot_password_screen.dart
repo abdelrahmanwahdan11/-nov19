@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
 
 import '../../core/localization/app_localizations.dart';
+import '../../core/widgets/quick_settings_button.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -18,7 +19,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final localization = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: Text(localization.t('forgotPassword'))),
+      appBar: AppBar(
+        title: Text(localization.t('forgotPassword')),
+        actions: const [QuickSettingsButton()],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(

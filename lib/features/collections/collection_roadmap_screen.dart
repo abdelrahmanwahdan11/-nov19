@@ -4,6 +4,7 @@ import 'package:iconly/iconly.dart';
 import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
+import '../../core/widgets/quick_settings_button.dart';
 
 class CollectionRoadmapScreen extends StatefulWidget {
   const CollectionRoadmapScreen({super.key, required this.collectionId});
@@ -23,7 +24,10 @@ class _CollectionRoadmapScreenState extends State<CollectionRoadmapScreen> {
     final localization = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: Text(localization.t('roadmap'))),
+      appBar: AppBar(
+        title: Text(localization.t('roadmap')),
+        actions: const [QuickSettingsButton()],
+      ),
       body: AnimatedBuilder(
         animation: controller,
         builder: (context, _) {

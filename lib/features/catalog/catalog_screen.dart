@@ -4,6 +4,7 @@ import 'package:iconly/iconly.dart';
 import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
+import '../../core/widgets/quick_settings_button.dart';
 
 class CatalogScreen extends StatelessWidget {
   const CatalogScreen({super.key});
@@ -14,7 +15,10 @@ class CatalogScreen extends StatelessWidget {
     final controller = AppScope.of(context).catalogController;
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: Text(localization.t('catalog'))),
+      appBar: AppBar(
+        title: Text(localization.t('catalog')),
+        actions: const [QuickSettingsButton()],
+      ),
       body: AnimatedBuilder(
         animation: controller,
         builder: (context, _) {

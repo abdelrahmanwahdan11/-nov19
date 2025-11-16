@@ -4,6 +4,7 @@ import 'package:iconly/iconly.dart';
 import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
+import '../../core/widgets/quick_settings_button.dart';
 
 class InsightsScreen extends StatelessWidget {
   const InsightsScreen({super.key});
@@ -16,12 +17,7 @@ class InsightsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(localization.t('insightsDeepDive')),
-        actions: [
-          IconButton(
-            onPressed: () => Navigator.of(context).pushNamed('/settings'),
-            icon: const Icon(IconlyLight.setting),
-          )
-        ],
+        actions: const [QuickSettingsButton()],
       ),
       body: AnimatedBuilder(
         animation: collections,

@@ -5,6 +5,7 @@ import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
 import '../../core/utils/itinerary_utils.dart';
+import '../../core/widgets/quick_settings_button.dart';
 import '../../core/widgets/skeleton_box.dart';
 
 class CollectionsScreen extends StatefulWidget {
@@ -46,12 +47,7 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text(localization.t('collections')),
-        actions: [
-          IconButton(
-            icon: const Icon(IconlyLight.setting),
-            onPressed: () => Navigator.of(context).pushNamed('/settings'),
-          )
-        ],
+        actions: const [QuickSettingsButton()],
       ),
       body: RefreshIndicator(
         onRefresh: collectionsController.refresh,

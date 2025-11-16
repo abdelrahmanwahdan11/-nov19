@@ -4,6 +4,7 @@ import 'package:iconly/iconly.dart';
 import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/widgets/primary_button.dart';
+import '../../core/widgets/quick_settings_button.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -47,6 +48,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text(localization.t('register')),
+        actions: const [QuickSettingsButton()],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),

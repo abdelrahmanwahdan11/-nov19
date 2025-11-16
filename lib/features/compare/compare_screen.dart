@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
+import '../../core/widgets/quick_settings_button.dart';
 
 class CompareScreen extends StatelessWidget {
   const CompareScreen({super.key});
@@ -16,7 +17,10 @@ class CompareScreen extends StatelessWidget {
     );
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: Text(localization.t('compareTitle'))),
+      appBar: AppBar(
+        title: Text(localization.t('compareTitle')),
+        actions: const [QuickSettingsButton()],
+      ),
       body: selected.isEmpty
           ? Center(child: Text(localization.t('tasksEmpty')))
           : SingleChildScrollView(

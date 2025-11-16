@@ -6,6 +6,7 @@ import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
 import '../../core/utils/itinerary_utils.dart';
+import '../../core/widgets/quick_settings_button.dart';
 import 'widgets/task_composer.dart';
 
 class CollectionDetailsScreen extends StatefulWidget {
@@ -39,12 +40,13 @@ class _CollectionDetailsScreenState extends State<CollectionDetailsScreen> with 
             headerSliverBuilder: (_, __) {
               return [
                 SliverAppBar(
-              expandedHeight: 320,
-              pinned: true,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
+                  expandedHeight: 320,
+                  pinned: true,
+                  actions: const [QuickSettingsButton(iconColor: Colors.white)],
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Stack(
+                      fit: StackFit.expand,
+                      children: [
                     Hero(
                       tag: collection.id,
                       child: Image.network(collection.images.first, fit: BoxFit.cover),
@@ -58,7 +60,7 @@ class _CollectionDetailsScreenState extends State<CollectionDetailsScreen> with 
                         ),
                       ),
                     ),
-                    Positioned(
+                        Positioned(
                       bottom: 40,
                       left: 24,
                       right: 24,

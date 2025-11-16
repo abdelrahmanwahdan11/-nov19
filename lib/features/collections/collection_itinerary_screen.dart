@@ -5,6 +5,7 @@ import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
 import '../../core/utils/itinerary_utils.dart';
+import '../../core/widgets/quick_settings_button.dart';
 
 class CollectionItineraryScreen extends StatefulWidget {
   const CollectionItineraryScreen({super.key, required this.collectionId});
@@ -38,7 +39,8 @@ class _CollectionItineraryScreenState extends State<CollectionItineraryScreen> {
               IconButton(
                 icon: const Icon(IconlyLight.plus),
                 onPressed: days.isEmpty ? null : () => _openComposer(context, collection, days),
-              )
+              ),
+              const QuickSettingsButton(),
             ],
           ),
           floatingActionButton: days.isEmpty

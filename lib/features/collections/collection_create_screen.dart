@@ -3,6 +3,7 @@ import 'package:iconly/iconly.dart';
 
 import '../../core/constants/app_assets.dart';
 import '../../core/localization/app_localizations.dart';
+import '../../core/widgets/quick_settings_button.dart';
 
 class CollectionCreateScreen extends StatefulWidget {
   const CollectionCreateScreen({super.key});
@@ -23,7 +24,10 @@ class _CollectionCreateScreenState extends State<CollectionCreateScreen> {
     final tabs = ['oneDay', 'multiDay', 'repeating'];
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: Text(localization.t('createManual'))),
+      appBar: AppBar(
+        title: Text(localization.t('createManual')),
+        actions: const [QuickSettingsButton()],
+      ),
       body: Column(
         children: [
           SizedBox(

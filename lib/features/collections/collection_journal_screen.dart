@@ -5,6 +5,7 @@ import '../../core/constants/app_assets.dart';
 import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
+import '../../core/widgets/quick_settings_button.dart';
 
 class CollectionJournalScreen extends StatefulWidget {
   const CollectionJournalScreen({super.key, required this.collectionId});
@@ -48,6 +49,7 @@ class _CollectionJournalScreenState extends State<CollectionJournalScreen> {
                 icon: const Icon(IconlyLight.plus),
                 tooltip: localization.t('addHighlight'),
               ),
+              const QuickSettingsButton(),
             ],
           ),
           floatingActionButton: FloatingActionButton.extended(

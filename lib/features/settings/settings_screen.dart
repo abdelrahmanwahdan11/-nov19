@@ -5,6 +5,7 @@ import 'package:iconly/iconly.dart';
 import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
+import '../../core/widgets/quick_settings_button.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -15,7 +16,10 @@ class SettingsScreen extends StatelessWidget {
     final localization = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: Text(localization.t('settings'))),
+      appBar: AppBar(
+        title: Text(localization.t('settings')),
+        actions: const [QuickSettingsButton()],
+      ),
       body: AnimatedBuilder(
         animation: Listenable.merge([
           controllers.settingsController,
