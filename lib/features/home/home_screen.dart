@@ -41,6 +41,7 @@ class HomeScreen extends StatelessWidget {
         final milestonePeek = controllers.collectionsController.upcomingMilestones(3);
         final itineraryPeek = controllers.collectionsController.upcomingItinerarySlots(4);
         final guestFollowUps = controllers.collectionsController.pendingGuests(5);
+        final vendorFollowUps = controllers.collectionsController.vendorFollowUps(5);
         final unread = controllers.notificationsController.unreadCount;
         return RefreshIndicator(
           onRefresh: controllers.collectionsController.refresh,
@@ -251,6 +252,60 @@ class HomeScreen extends StatelessWidget {
                             .updateGuestStatus(entry.collection.id, entry.guest.id, GuestStatus.confirmed),
                         onOpen: () => Navigator.of(context)
                             .pushNamed('/collection_guests', arguments: entry.collection.id),
+                      );
+                    },
+                  ),
+                ),
+              ],
+              if (vendorFollowUps.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(localization.t('vendorFollowups'),
+                          style: Theme.of(context).textTheme.titleMedium),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed('/collection_vendors', arguments: vendorFollowUps.first.collection.id),
+                      child: Text(localization.t('vendorOpenList')),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 190,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: vendorFollowUps.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (_, index) {
+                      final entry = vendorFollowUps[index];
+                      var nextStatus = entry.vendor.status;
+                      switch (entry.vendor.status) {
+                        case VendorStatus.scouting:
+                          nextStatus = VendorStatus.negotiating;
+                          break;
+                        case VendorStatus.negotiating:
+                          nextStatus = VendorStatus.booked;
+                          break;
+                        case VendorStatus.booked:
+                          nextStatus = VendorStatus.paid;
+                          break;
+                        case VendorStatus.paid:
+                          nextStatus = VendorStatus.paid;
+                          break;
+                      }
+                      return _VendorFollowUpCard(
+                        collection: entry.collection,
+                        vendor: entry.vendor,
+                        localization: localization,
+                        onAdvance: entry.vendor.status == VendorStatus.paid
+                            ? null
+                            : () => controllers.collectionsController
+                                .updateVendorStatus(entry.collection.id, entry.vendor.id, nextStatus),
+                        onOpen: () => Navigator.of(context)
+                            .pushNamed('/collection_vendors', arguments: entry.collection.id),
                       );
                     },
                   ),
@@ -484,6 +539,130 @@ class _GuestFollowUpCard extends StatelessWidget {
   }
 }
 
+class _VendorFollowUpCard extends StatelessWidget {
+  const _VendorFollowUpCard({
+    required this.collection,
+    required this.vendor,
+    required this.localization,
+    required this.onOpen,
+    this.onAdvance,
+  });
+
+  final CollectionModel collection;
+  final VendorModel vendor;
+  final AppLocalizations localization;
+  final VoidCallback? onAdvance;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final dueLabel = MaterialLocalizations.of(context).formatMediumDate(vendor.dueDate);
+    final statusLabel = _statusLabel(vendor.status);
+    final statusColor = _statusColor(context, vendor.status);
+    return Container(
+      width: 240,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        color: Theme.of(context).cardTheme.color,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(backgroundImage: NetworkImage(vendor.avatar), radius: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(vendor.name, style: Theme.of(context).textTheme.titleSmall),
+                    Text(collection.title,
+                        style: Theme.of(context).textTheme.bodySmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(vendor.category, style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              Chip(
+                avatar: const Icon(IconlyLight.calendar, size: 16),
+                label: Text('${localization.t('vendorDueLabel')} $dueLabel'),
+              ),
+              Chip(
+                avatar: const Icon(IconlyLight.wallet, size: 16),
+                label: Text(vendor.cost.toStringAsFixed(0)),
+              ),
+              Chip(
+                label: Text(statusLabel),
+                backgroundColor: statusColor,
+              ),
+            ],
+          ),
+          const Spacer(),
+          Row(
+            children: [
+              IconButton(
+                onPressed: onOpen,
+                icon: const Icon(IconlyLight.setting),
+                tooltip: localization.t('vendorOpenList'),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: onAdvance,
+                  child: Text(
+                    vendor.status == VendorStatus.booked
+                        ? localization.t('vendorMarkPaid')
+                        : vendor.status == VendorStatus.paid
+                            ? localization.t('vendorStatusPaid')
+                            : localization.t('vendorAdvance'),
+                  ),
+                ),
+              )
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  String _statusLabel(VendorStatus status) {
+    switch (status) {
+      case VendorStatus.negotiating:
+        return localization.t('vendorStatusNegotiating');
+      case VendorStatus.booked:
+        return localization.t('vendorStatusBooked');
+      case VendorStatus.paid:
+        return localization.t('vendorStatusPaid');
+      default:
+        return localization.t('vendorStatusScouting');
+    }
+  }
+
+  Color _statusColor(BuildContext context, VendorStatus status) {
+    switch (status) {
+      case VendorStatus.paid:
+        return Colors.green.withOpacity(0.2);
+      case VendorStatus.booked:
+        return Theme.of(context).primaryColor.withOpacity(0.2);
+      case VendorStatus.negotiating:
+        return Colors.amber.withOpacity(0.2);
+      default:
+        return Colors.blueGrey.withOpacity(0.2);
+    }
+  }
+}
+
 class _CollectionCard extends StatelessWidget {
   const _CollectionCard({required this.collection});
 
@@ -500,6 +679,10 @@ class _CollectionCard extends StatelessWidget {
     final guestSummary = controller.guestStatusSummary(collection.id);
     final totalGuests = collection.guests.length;
     final confirmedGuests = guestSummary[GuestStatus.confirmed] ?? 0;
+    final vendorSummary = controller.vendorStatusSummary(collection.id);
+    final openVendors = (vendorSummary[VendorStatus.scouting] ?? 0) +
+        (vendorSummary[VendorStatus.negotiating] ?? 0);
+    final bookedVendors = vendorSummary[VendorStatus.booked] ?? 0;
     final timeLabel = nextSlot == null
         ? null
         : MaterialLocalizations.of(context).formatTimeOfDay(nextSlot.slot.time);
@@ -562,6 +745,26 @@ class _CollectionCard extends StatelessWidget {
                         child: Text(localization.t('openItinerary')),
                       ),
                     )
+                  ],
+                  if (collection.vendors.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(IconlyLight.work, size: 16),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            '${localization.t('vendorPending')}: $openVendors · ${localization.t('vendorStatusBooked')}: $bookedVendors',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context)
+                              .pushNamed('/collection_vendors', arguments: collection.id),
+                          child: Text(localization.t('vendorOpenList')),
+                        )
+                      ],
+                    ),
                   ],
                   if (totalGuests > 0) ...[
                     const SizedBox(height: 8),

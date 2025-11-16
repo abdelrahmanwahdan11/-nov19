@@ -196,6 +196,10 @@ class _SummaryTab extends StatelessWidget {
           const SizedBox(height: 16),
           _GuestPeekCard(collectionId: collection.id),
         ],
+        if (collection.vendors.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _VendorPeekCard(collectionId: collection.id),
+        ],
         if (itinerary.isNotEmpty) ...[
           const SizedBox(height: 16),
           Row(
@@ -419,6 +423,122 @@ class _GuestPeekCard extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+}
+
+class _VendorPeekCard extends StatelessWidget {
+  const _VendorPeekCard({required this.collectionId});
+
+  final String collectionId;
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context);
+    final controller = AppScope.of(context).collectionsController;
+    final vendors = controller.vendorsFor(collectionId);
+    final summary = controller.vendorStatusSummary(collectionId);
+    final dueSoon = vendors
+        .where((vendor) => vendor.dueDate.isBefore(DateTime.now().add(const Duration(days: 5))) &&
+            vendor.status != VendorStatus.paid)
+        .length;
+    final booked = summary[VendorStatus.booked] ?? 0;
+    final negotiating = summary[VendorStatus.negotiating] ?? 0;
+    final committed = controller.vendorTotalCost(collectionId);
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        color: Theme.of(context).cardTheme.color,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(localization.t('vendorPeekTitle'), style: Theme.of(context).textTheme.titleMedium)),
+              TextButton.icon(
+                onPressed: () => Navigator.of(context)
+                    .pushNamed('/collection_vendors', arguments: collectionId),
+                icon: const Icon(IconlyLight.work),
+                label: Text(localization.t('vendorOpenList')),
+              )
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(localization.t('vendorPeekSubtitle')),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _VendorSummaryStat(
+                  label: localization.t('vendorStatusBooked'),
+                  value: '$booked',
+                ),
+              ),
+              Expanded(
+                child: _VendorSummaryStat(
+                  label: localization.t('vendorStatusNegotiating'),
+                  value: '$negotiating',
+                ),
+              ),
+              Expanded(
+                child: _VendorSummaryStat(
+                  label: localization.t('vendorDueSoon'),
+                  value: '$dueSoon',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text('${localization.t('vendorTotalCommitted')}: ${committed.toStringAsFixed(0)}',
+              style: Theme.of(context).textTheme.labelLarge),
+          const SizedBox(height: 12),
+          Column(
+            children: vendors.take(3).map((vendor) {
+              final dueLabel = MaterialLocalizations.of(context).formatMediumDate(vendor.dueDate);
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(backgroundImage: NetworkImage(vendor.avatar)),
+                title: Text(vendor.name),
+                subtitle: Text('${vendor.category} · ${localization.t('vendorDueLabel')} $dueLabel'),
+                trailing: Chip(label: Text(_statusLabel(localization, vendor.status))),
+              );
+            }).toList(),
+          )
+        ],
+      ),
+    );
+  }
+
+  String _statusLabel(AppLocalizations localization, VendorStatus status) {
+    switch (status) {
+      case VendorStatus.negotiating:
+        return localization.t('vendorStatusNegotiating');
+      case VendorStatus.booked:
+        return localization.t('vendorStatusBooked');
+      case VendorStatus.paid:
+        return localization.t('vendorStatusPaid');
+      default:
+        return localization.t('vendorStatusScouting');
+    }
+  }
+}
+
+class _VendorSummaryStat extends StatelessWidget {
+  const _VendorSummaryStat({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(value, style: Theme.of(context).textTheme.headlineSmall),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
+      ],
     );
   }
 }

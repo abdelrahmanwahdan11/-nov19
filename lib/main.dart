@@ -18,6 +18,7 @@ import 'features/collections/collection_guests_screen.dart';
 import 'features/collections/collection_itinerary_screen.dart';
 import 'features/collections/collection_journal_screen.dart';
 import 'features/collections/collection_roadmap_screen.dart';
+import 'features/collections/collection_vendors_screen.dart';
 import 'features/collections/collections_screen.dart';
 import 'features/collections/task_schedule_screen.dart';
 import 'features/compare/compare_screen.dart';
@@ -131,6 +132,11 @@ class _NuviqAppState extends State<NuviqApp> {
                 final id = settings.arguments as String?;
                 return MaterialPageRoute(
                   builder: (_) => CollectionItineraryScreen(collectionId: id ?? 'c1'),
+                );
+              case '/collection_vendors':
+                final id = settings.arguments as String?;
+                return MaterialPageRoute(
+                  builder: (_) => CollectionVendorsScreen(collectionId: id ?? 'c1'),
                 );
               case '/collection_roadmap':
                 final id = settings.arguments as String?;

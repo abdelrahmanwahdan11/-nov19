@@ -52,6 +52,7 @@ class CollectionsController extends ChangeNotifier {
   List<JournalEntryModel> journalFor(String id) => byId(id).journalEntries;
   List<ItineraryDayModel> itineraryFor(String id) => byId(id).itinerary;
   List<GuestModel> guestsFor(String id) => byId(id).guests;
+  List<VendorModel> vendorsFor(String id) => byId(id).vendors;
 
   Map<GuestStatus, int> guestStatusSummary(String id) {
     final guests = guestsFor(id);
@@ -63,6 +64,17 @@ class CollectionsController extends ChangeNotifier {
   }
 
   int confirmedGuests(String id) => guestStatusSummary(id)[GuestStatus.confirmed] ?? 0;
+
+  Map<VendorStatus, int> vendorStatusSummary(String id) {
+    final vendors = vendorsFor(id);
+    final summary = {for (final status in VendorStatus.values) status: 0};
+    for (final vendor in vendors) {
+      summary[vendor.status] = (summary[vendor.status] ?? 0) + 1;
+    }
+    return summary;
+  }
+
+  double vendorTotalCost(String id) => vendorsFor(id).fold(0, (sum, vendor) => sum + vendor.cost);
 
   double budgetProgress(String id) {
     final collection = byId(id);
@@ -249,6 +261,20 @@ class CollectionsController extends ChangeNotifier {
     _replaceCollection(collection.copyWith(guests: updatedGuests));
   }
 
+  void updateVendorStatus(String collectionId, String vendorId, VendorStatus status) {
+    final collection = byId(collectionId);
+    final updated = collection.vendors
+        .map((vendor) => vendor.id == vendorId ? vendor.copyWith(status: status) : vendor)
+        .toList();
+    _replaceCollection(collection.copyWith(vendors: updated));
+  }
+
+  void addVendor(String collectionId, VendorModel vendor) {
+    final collection = byId(collectionId);
+    final updated = [...collection.vendors, vendor];
+    _replaceCollection(collection.copyWith(vendors: updated));
+  }
+
   Map<JournalMood, int> journalMoodSummary(String collectionId) {
     final entries = journalFor(collectionId);
     final map = {for (final mood in JournalMood.values) mood: 0};
@@ -426,5 +452,21 @@ class CollectionsController extends ChangeNotifier {
       }
     }
     return pending.take(take).toList();
+  }
+
+  List<({CollectionModel collection, VendorModel vendor})> vendorFollowUps([int take = 4]) {
+    final entries = <({CollectionModel collection, VendorModel vendor})>[];
+    final now = DateTime.now();
+    final soon = now.add(const Duration(days: 5));
+    for (final collection in DummyData.collections) {
+      for (final vendor in collection.vendors) {
+        final dueSoon = vendor.dueDate.isBefore(soon) && vendor.status != VendorStatus.paid;
+        if (dueSoon || vendor.status == VendorStatus.negotiating) {
+          entries.add((collection: collection, vendor: vendor));
+        }
+      }
+    }
+    entries.sort((a, b) => a.vendor.dueDate.compareTo(b.vendor.dueDate));
+    return entries.take(take).toList();
   }
 }

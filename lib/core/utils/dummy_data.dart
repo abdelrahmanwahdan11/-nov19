@@ -82,6 +82,7 @@ class CollectionModel {
     this.journalEntries = const [],
     this.itinerary = const [],
     this.guests = const [],
+    this.vendors = const [],
   });
 
   final String id;
@@ -99,6 +100,7 @@ class CollectionModel {
   final List<JournalEntryModel> journalEntries;
   final List<ItineraryDayModel> itinerary;
   final List<GuestModel> guests;
+  final List<VendorModel> vendors;
 
   CollectionModel copyWith({
     bool? isFavourite,
@@ -109,6 +111,7 @@ class CollectionModel {
     List<JournalEntryModel>? journalEntries,
     List<ItineraryDayModel>? itinerary,
     List<GuestModel>? guests,
+    List<VendorModel>? vendors,
   }) =>
       CollectionModel(
         id: id,
@@ -126,6 +129,7 @@ class CollectionModel {
         journalEntries: journalEntries ?? this.journalEntries,
         itinerary: itinerary ?? this.itinerary,
         guests: guests ?? this.guests,
+        vendors: vendors ?? this.vendors,
       );
 }
 
@@ -235,6 +239,50 @@ class GuestModel {
         role: role ?? this.role,
         contact: contact ?? this.contact,
         avatar: avatar ?? this.avatar,
+        status: status ?? this.status,
+      );
+}
+
+enum VendorStatus { scouting, negotiating, booked, paid }
+
+class VendorModel {
+  const VendorModel({
+    required this.id,
+    required this.name,
+    required this.category,
+    required this.contact,
+    required this.avatar,
+    required this.cost,
+    required this.dueDate,
+    this.status = VendorStatus.scouting,
+  });
+
+  final String id;
+  final String name;
+  final String category;
+  final String contact;
+  final String avatar;
+  final double cost;
+  final DateTime dueDate;
+  final VendorStatus status;
+
+  VendorModel copyWith({
+    String? name,
+    String? category,
+    String? contact,
+    String? avatar,
+    double? cost,
+    DateTime? dueDate,
+    VendorStatus? status,
+  }) =>
+      VendorModel(
+        id: id,
+        name: name ?? this.name,
+        category: category ?? this.category,
+        contact: contact ?? this.contact,
+        avatar: avatar ?? this.avatar,
+        cost: cost ?? this.cost,
+        dueDate: dueDate ?? this.dueDate,
         status: status ?? this.status,
       );
 }
@@ -461,6 +509,38 @@ class DummyData {
           ],
         ),
       ],
+      vendors: [
+        VendorModel(
+          id: 'v1',
+          name: 'Desert Wheels',
+          category: 'Transport',
+          contact: '+971 55 880 2210',
+          avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80',
+          cost: 2800,
+          dueDate: DateTime.now().add(const Duration(days: 2)),
+          status: VendorStatus.negotiating,
+        ),
+        VendorModel(
+          id: 'v2',
+          name: 'Bedouin Feast Co.',
+          category: 'Catering',
+          contact: '+971 55 612 7821',
+          avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
+          cost: 1900,
+          dueDate: DateTime.now().add(const Duration(days: 4)),
+          status: VendorStatus.booked,
+        ),
+        VendorModel(
+          id: 'v3',
+          name: 'Skyline Drones',
+          category: 'Media',
+          contact: '+971 50 300 1133',
+          avatar: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=200&q=80',
+          cost: 1500,
+          dueDate: DateTime.now().add(const Duration(days: 8)),
+          status: VendorStatus.scouting,
+        ),
+      ],
     ),
     CollectionModel(
       id: 'c2',
@@ -625,6 +705,38 @@ class DummyData {
               tag: ItineraryTags.culinary,
             ),
           ],
+        ),
+      ],
+      vendors: [
+        VendorModel(
+          id: 'v4',
+          name: 'Maison Gather',
+          category: 'Catering',
+          contact: '+962 78 300 9988',
+          avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
+          cost: 3100,
+          dueDate: DateTime.now().add(const Duration(days: 7)),
+          status: VendorStatus.booked,
+        ),
+        VendorModel(
+          id: 'v5',
+          name: 'Lumen AV Lab',
+          category: 'Lighting',
+          contact: '+962 79 115 5522',
+          avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=60',
+          cost: 2200,
+          dueDate: DateTime.now().add(const Duration(days: 9)),
+          status: VendorStatus.negotiating,
+        ),
+        VendorModel(
+          id: 'v6',
+          name: 'Trio Resonance',
+          category: 'Entertainment',
+          contact: '+962 77 700 4421',
+          avatar: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=200&q=70',
+          cost: 1450,
+          dueDate: DateTime.now().add(const Duration(days: 12)),
+          status: VendorStatus.booked,
         ),
       ],
     ),
@@ -792,6 +904,48 @@ class DummyData {
               tag: ItineraryTags.culinary,
             ),
           ],
+        ),
+      ],
+      vendors: [
+        VendorModel(
+          id: 'v7',
+          name: 'Neon Hive Studios',
+          category: 'Visuals',
+          contact: '+966 58 100 1200',
+          avatar: 'https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=200&q=80',
+          cost: 4200,
+          dueDate: DateTime.now().add(const Duration(days: 1)),
+          status: VendorStatus.negotiating,
+        ),
+        VendorModel(
+          id: 'v8',
+          name: 'Haze District',
+          category: 'Effects',
+          contact: '+966 53 340 9822',
+          avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80',
+          cost: 900,
+          dueDate: DateTime.now().add(const Duration(days: 3)),
+          status: VendorStatus.booked,
+        ),
+        VendorModel(
+          id: 'v9',
+          name: 'Midnight Shawarma',
+          category: 'Culinary',
+          contact: '+966 50 990 8712',
+          avatar: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=200&q=80',
+          cost: 750,
+          dueDate: DateTime.now().add(const Duration(days: 2)),
+          status: VendorStatus.booked,
+        ),
+        VendorModel(
+          id: 'v10',
+          name: 'Soundwave Agency',
+          category: 'Entertainment',
+          contact: '+966 59 200 5501',
+          avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80',
+          cost: 2600,
+          dueDate: DateTime.now().add(const Duration(days: 5)),
+          status: VendorStatus.scouting,
         ),
       ],
     ),
