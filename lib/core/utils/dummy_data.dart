@@ -84,6 +84,7 @@ class CollectionModel {
     this.guests = const [],
     this.vendors = const [],
     this.logistics = const [],
+    this.budgetLines = const [],
   });
 
   final String id;
@@ -103,6 +104,7 @@ class CollectionModel {
   final List<GuestModel> guests;
   final List<VendorModel> vendors;
   final List<LogisticItemModel> logistics;
+  final List<BudgetLineModel> budgetLines;
 
   CollectionModel copyWith({
     bool? isFavourite,
@@ -115,6 +117,7 @@ class CollectionModel {
     List<GuestModel>? guests,
     List<VendorModel>? vendors,
     List<LogisticItemModel>? logistics,
+    List<BudgetLineModel>? budgetLines,
   }) =>
       CollectionModel(
         id: id,
@@ -134,6 +137,7 @@ class CollectionModel {
         guests: guests ?? this.guests,
         vendors: vendors ?? this.vendors,
         logistics: logistics ?? this.logistics,
+        budgetLines: budgetLines ?? this.budgetLines,
       );
 }
 
@@ -188,6 +192,36 @@ class MilestoneModel {
         subtitle: subtitle,
         date: date,
         status: status ?? this.status,
+      );
+}
+
+class BudgetLineModel {
+  const BudgetLineModel({
+    required this.id,
+    required this.category,
+    required this.planned,
+    required this.spent,
+    this.note = '',
+  });
+
+  final String id;
+  final String category;
+  final double planned;
+  final double spent;
+  final String note;
+
+  BudgetLineModel copyWith({
+    String? category,
+    double? planned,
+    double? spent,
+    String? note,
+  }) =>
+      BudgetLineModel(
+        id: id,
+        category: category ?? this.category,
+        planned: planned ?? this.planned,
+        spent: spent ?? this.spent,
+        note: note ?? this.note,
       );
 }
 
@@ -419,6 +453,36 @@ class DummyData {
       ],
       budgetPlanned: 12000,
       budgetUsed: 6200,
+      budgetLines: const [
+        BudgetLineModel(
+          id: 'c1b1',
+          category: 'Transport',
+          planned: 4000,
+          spent: 2800,
+          note: 'Jeeps, drivers, and dune permits.',
+        ),
+        BudgetLineModel(
+          id: 'c1b2',
+          category: 'Food & Beverage',
+          planned: 3200,
+          spent: 2100,
+          note: 'Sunrise breakfast menu and tea ritual.',
+        ),
+        BudgetLineModel(
+          id: 'c1b3',
+          category: 'Experiences',
+          planned: 2800,
+          spent: 1900,
+          note: 'Camel rides, drone team, and music.',
+        ),
+        BudgetLineModel(
+          id: 'c1b4',
+          category: 'Safety & permits',
+          planned: 2000,
+          spent: 1400,
+          note: 'Insurance and ranger standby.',
+        ),
+      ],
       isFavourite: true,
       tasks: [
         TaskModel(
@@ -741,6 +805,36 @@ class DummyData {
       ],
       budgetPlanned: 9000,
       budgetUsed: 7800,
+      budgetLines: const [
+        BudgetLineModel(
+          id: 'c2b1',
+          category: 'Venue & decor',
+          planned: 3200,
+          spent: 3400,
+          note: 'Projection mapping gear and rentals.',
+        ),
+        BudgetLineModel(
+          id: 'c2b2',
+          category: 'Catering',
+          planned: 2800,
+          spent: 2500,
+          note: 'Seven-course tasting dinner.',
+        ),
+        BudgetLineModel(
+          id: 'c2b3',
+          category: 'Entertainment',
+          planned: 1600,
+          spent: 1400,
+          note: 'Acoustic trio and audio tech.',
+        ),
+        BudgetLineModel(
+          id: 'c2b4',
+          category: 'Gifting',
+          planned: 1400,
+          spent: 500,
+          note: 'Personalized keepsakes and packaging.',
+        ),
+      ],
       tasks: [
         TaskModel(
           id: 't3',
@@ -939,6 +1033,36 @@ class DummyData {
       ],
       budgetPlanned: 15000,
       budgetUsed: 11000,
+      budgetLines: const [
+        BudgetLineModel(
+          id: 'c3b1',
+          category: 'Production',
+          planned: 6000,
+          spent: 5200,
+          note: 'LED walls, lasers, stage automation.',
+        ),
+        BudgetLineModel(
+          id: 'c3b2',
+          category: 'Talent',
+          planned: 3000,
+          spent: 2700,
+          note: 'Secret DJs and VJ crew.',
+        ),
+        BudgetLineModel(
+          id: 'c3b3',
+          category: 'Hospitality',
+          planned: 2800,
+          spent: 1900,
+          note: 'Premium bar program and bites.',
+        ),
+        BudgetLineModel(
+          id: 'c3b4',
+          category: 'Experience tech',
+          planned: 2200,
+          spent: 1200,
+          note: 'AI photo booth + NFC invites.',
+        ),
+      ],
       tasks: [
         TaskModel(
           id: 't5',

@@ -159,6 +159,7 @@ class _SummaryTab extends StatelessWidget {
         : (collection.budgetUsed / collection.budgetPlanned).clamp(0, 1);
     final remaining = (collection.budgetPlanned - collection.budgetUsed).clamp(0, collection.budgetPlanned);
     final itinerary = collection.itinerary;
+    final budgetLines = controller.budgetLinesFor(collection.id);
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
@@ -274,6 +275,37 @@ class _SummaryTab extends StatelessWidget {
             ],
           ),
         ),
+        if (budgetLines.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child:
+                    Text(localization.t('budgetCategories'), style: Theme.of(context).textTheme.titleMedium),
+              ),
+              TextButton(
+                onPressed: () =>
+                    Navigator.of(context).pushNamed('/collection_budget', arguments: collection.id),
+                child: Text(localization.t('openBudgetBoard')),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Column(
+            children: budgetLines
+                .take(3)
+                .map(
+                  (line) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _BudgetLinePreview(
+                      line: line,
+                      ratio: controller.budgetLineProgress(line),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        ],
         const SizedBox(height: 16),
         _JournalPeekCard(collectionId: collection.id),
         const SizedBox(height: 16),
@@ -358,6 +390,64 @@ class _BudgetStat extends StatelessWidget {
         Text(value, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white)),
         Text(label, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.white70)),
       ],
+    );
+  }
+}
+
+class _BudgetLinePreview extends StatelessWidget {
+  const _BudgetLinePreview({required this.line, required this.ratio});
+
+  final BudgetLineModel line;
+  final double ratio;
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context);
+    final isOver = line.spent > line.planned;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(26),
+        color: Theme.of(context).cardTheme.color,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(line.category, style: Theme.of(context).textTheme.titleMedium)),
+              Chip(
+                label: Text(isOver ? localization.t('budgetOverLabel') : localization.t('budgetNearLabel')),
+                backgroundColor:
+                    isOver ? Colors.red.withOpacity(0.12) : Theme.of(context).primaryColor.withOpacity(0.15),
+              )
+            ],
+          ),
+          if (line.note.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 8),
+              child: Text(line.note, style: Theme.of(context).textTheme.bodySmall),
+            ),
+          LinearProgressIndicator(
+            value: ratio,
+            minHeight: 6,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: Text('${localization.t('budgetPlanned')}: ${line.planned.toStringAsFixed(0)}',
+                    style: Theme.of(context).textTheme.labelSmall),
+              ),
+              Expanded(
+                child: Text('${localization.t('budgetUsed')}: ${line.spent.toStringAsFixed(0)}',
+                    style: Theme.of(context).textTheme.labelSmall),
+              ),
+            ],
+          )
+        ],
+      ),
     );
   }
 }

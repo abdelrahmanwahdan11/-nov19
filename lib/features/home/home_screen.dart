@@ -43,6 +43,7 @@ class HomeScreen extends StatelessWidget {
         final guestFollowUps = controllers.collectionsController.pendingGuests(5);
         final vendorFollowUps = controllers.collectionsController.vendorFollowUps(5);
         final logisticsPeek = controllers.collectionsController.upcomingLogistics(5);
+        final budgetPressure = controllers.collectionsController.budgetPressureLines(4);
         final unread = controllers.notificationsController.unreadCount;
         return RefreshIndicator(
           onRefresh: controllers.collectionsController.refresh,
@@ -191,6 +192,39 @@ class HomeScreen extends StatelessWidget {
                 used: totalBudgetUsed,
                 localization: localization,
               ),
+              if (budgetPressure.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(localization.t('budgetPressureTitle'),
+                          style: Theme.of(context).textTheme.titleMedium),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed('/collection_budget', arguments: budgetPressure.first.collection.id),
+                      child: Text(localization.t('openBudgetBoard')),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(localization.t('budgetPressureSubtitle'),
+                    style: Theme.of(context).textTheme.bodySmall),
+                const SizedBox(height: 12),
+                Column(
+                  children: budgetPressure
+                      .map(
+                        (entry) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _BudgetPressureTile(
+                            entry: entry,
+                            ratio: controllers.collectionsController.budgetLineProgress(entry.line),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
               const SizedBox(height: 24),
               Text(localization.t('autoPlanner'), style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 12),
@@ -1096,6 +1130,72 @@ class _ItinerarySnippetCard extends StatelessWidget {
               ),
             ),
             const Icon(IconlyLight.arrow_right_2),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BudgetPressureTile extends StatelessWidget {
+  const _BudgetPressureTile({required this.entry, required this.ratio});
+
+  final ({CollectionModel collection, BudgetLineModel line}) entry;
+  final double ratio;
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context);
+    final collection = entry.collection;
+    final line = entry.line;
+    final isOver = line.spent > line.planned;
+    final badge = isOver ? localization.t('budgetOverLabel') : localization.t('budgetNearLabel');
+    return InkWell(
+      onTap: () => Navigator.of(context).pushNamed('/collection_budget', arguments: collection.id),
+      borderRadius: BorderRadius.circular(28),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          color: Theme.of(context).cardTheme.color,
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: Theme.of(context).primaryColor.withOpacity(0.15),
+              child: const Icon(IconlyLight.wallet),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(line.category, style: Theme.of(context).textTheme.titleMedium),
+                  Text(collection.title, style: Theme.of(context).textTheme.bodySmall),
+                  const SizedBox(height: 6),
+                  LinearProgressIndicator(
+                    value: ratio,
+                    minHeight: 6,
+                    backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text('${(ratio * 100).round()}%',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Chip(
+                  label: Text(badge),
+                  backgroundColor:
+                      isOver ? Colors.red.withOpacity(0.15) : Theme.of(context).primaryColor.withOpacity(0.15),
+                ),
+              ],
+            )
           ],
         ),
       ),

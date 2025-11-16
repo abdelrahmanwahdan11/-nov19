@@ -54,6 +54,7 @@ class CollectionsController extends ChangeNotifier {
   List<GuestModel> guestsFor(String id) => byId(id).guests;
   List<VendorModel> vendorsFor(String id) => byId(id).vendors;
   List<LogisticItemModel> logisticsFor(String id) => byId(id).logistics;
+  List<BudgetLineModel> budgetLinesFor(String id) => byId(id).budgetLines;
 
   Map<GuestStatus, int> guestStatusSummary(String id) {
     final guests = guestsFor(id);
@@ -99,6 +100,11 @@ class CollectionsController extends ChangeNotifier {
     final collection = byId(id);
     if (collection.budgetPlanned == 0) return 0;
     return (collection.budgetUsed / collection.budgetPlanned).clamp(0, 1);
+  }
+
+  double budgetLineProgress(BudgetLineModel line) {
+    if (line.planned == 0) return 0;
+    return (line.spent / line.planned).clamp(0, 1);
   }
 
   double completionRate(String id) {
@@ -161,6 +167,11 @@ class CollectionsController extends ChangeNotifier {
       DummyData.collections.fold(0, (previousValue, element) => previousValue + element.budgetPlanned);
   double get totalBudgetUsed =>
       DummyData.collections.fold(0, (previousValue, element) => previousValue + element.budgetUsed);
+
+  double totalBudgetVariance(String id) {
+    final collection = byId(id);
+    return collection.budgetUsed - collection.budgetPlanned;
+  }
 
   int get totalTasksCount =>
       DummyData.collections.fold(0, (previousValue, element) => previousValue + element.tasks.length);
@@ -232,6 +243,27 @@ class CollectionsController extends ChangeNotifier {
     final collection = byId(collectionId);
     final updatedTasks = [...collection.tasks, task];
     _replaceCollection(collection.copyWith(tasks: updatedTasks));
+  }
+
+  void addBudgetLine(String collectionId, BudgetLineModel line) {
+    final collection = byId(collectionId);
+    final updated = [...collection.budgetLines, line];
+    _replaceCollection(collection.copyWith(budgetLines: updated));
+  }
+
+  void updateBudgetLine(String collectionId, String lineId,
+      {double? planned, double? spent, String? note, String? category}) {
+    final collection = byId(collectionId);
+    final updated = collection.budgetLines.map((line) {
+      if (line.id != lineId) return line;
+      return line.copyWith(
+        planned: planned,
+        spent: spent,
+        note: note,
+        category: category,
+      );
+    }).toList();
+    _replaceCollection(collection.copyWith(budgetLines: updated));
   }
 
   void addItinerarySlot(String collectionId, String dayId, ItinerarySlotModel slot) {
@@ -446,6 +478,25 @@ class CollectionsController extends ChangeNotifier {
       }
     }
     entries.sort((a, b) => a.item.start.compareTo(b.item.start));
+    return entries.take(take).toList();
+  }
+
+  List<({CollectionModel collection, BudgetLineModel line})> budgetPressureLines([int take = 4]) {
+    final entries = <({CollectionModel collection, BudgetLineModel line})>[];
+    for (final collection in DummyData.collections) {
+      for (final line in collection.budgetLines) {
+        if (line.planned == 0) continue;
+        final ratio = line.spent / line.planned;
+        if (ratio >= 0.7 || (collection.budgetUsed > collection.budgetPlanned && ratio >= 0.5)) {
+          entries.add((collection: collection, line: line));
+        }
+      }
+    }
+    entries.sort((a, b) {
+      final aRatio = a.line.planned == 0 ? 0.0 : a.line.spent / a.line.planned;
+      final bRatio = b.line.planned == 0 ? 0.0 : b.line.spent / b.line.planned;
+      return bRatio.compareTo(aRatio);
+    });
     return entries.take(take).toList();
   }
 
