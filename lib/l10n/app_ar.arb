@@ -111,5 +111,20 @@
   "activeEvents": "فعاليات نشطة",
   "tasksDueSoon": "مستحقة هذا الأسبوع",
   "digestTitle": "ملخص الصباح",
-  "digestDescription": "أرسل لي تنبيهاً ملخصاً محلياً"
+  "digestDescription": "أرسل لي تنبيهاً ملخصاً محلياً",
+  "budgetHealth": "صحة الميزانية",
+  "budgetPlanned": "المخطط",
+  "budgetUsed": "المصروف",
+  "budgetRemaining": "المتبقي",
+  "milestones": "المعالم",
+  "openRoadmap": "عرض خارطة الطريق",
+  "roadmap": "خارطة الطريق",
+  "roadmapEmpty": "لا توجد معالم بعد",
+  "statusPlanned": "مجدول",
+  "statusProgress": "قيد التنفيذ",
+  "statusDone": "مكتمل",
+  "tapCycleStatus": "اضغط لتغيير الحالة",
+  "roadmapHint": "رشّح وحدث المعالم لإبقاء الفريق متزامناً.",
+  "nextMilestones": "المعالم القادمة",
+  "overBudgetOnly": "المتجاوز للميزانية فقط"
 }

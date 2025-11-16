@@ -144,6 +144,12 @@ class _SummaryTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localization = AppLocalizations.of(context);
+    final controller = AppScope.of(context).collectionsController;
+    final milestones = collection.milestones;
+    final progress = collection.budgetPlanned == 0
+        ? 0.0
+        : (collection.budgetUsed / collection.budgetPlanned).clamp(0, 1);
+    final remaining = (collection.budgetPlanned - collection.budgetUsed).clamp(0, collection.budgetPlanned);
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
@@ -176,7 +182,138 @@ class _SummaryTab extends StatelessWidget {
               )
             ],
           ),
-        )
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor.withOpacity(0.15),
+                Theme.of(context).primaryColor.withOpacity(0.4),
+              ],
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(localization.t('budgetHealth'), style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 12),
+              LinearProgressIndicator(
+                value: progress,
+                minHeight: 8,
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+                backgroundColor: Colors.white24,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _BudgetStat(
+                      label: localization.t('budgetPlanned'),
+                      value: collection.budgetPlanned.toStringAsFixed(0),
+                    ),
+                  ),
+                  Expanded(
+                    child: _BudgetStat(
+                      label: localization.t('budgetUsed'),
+                      value: collection.budgetUsed.toStringAsFixed(0),
+                    ),
+                  ),
+                  Expanded(
+                    child: _BudgetStat(
+                      label: localization.t('budgetRemaining'),
+                      value: remaining.toStringAsFixed(0),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: Text(localization.t('milestones'), style: Theme.of(context).textTheme.titleMedium),
+            ),
+            TextButton.icon(
+              onPressed: () => Navigator.of(context)
+                  .pushNamed('/collection_roadmap', arguments: collection.id),
+              icon: const Icon(IconlyLight.discovery),
+              label: Text(localization.t('openRoadmap')),
+            )
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (milestones.isEmpty)
+          Text(localization.t('roadmapEmpty'))
+        else ...milestones.take(3).map(
+          (milestone) => Card(
+            child: ListTile(
+              onTap: () => controller.cycleMilestoneStatus(collection.id, milestone.id),
+              title: Text(milestone.title),
+              subtitle: Text('${milestone.subtitle}\n${_formatDate(milestone.date)}'),
+              isThreeLine: true,
+              trailing: Chip(
+                label: Text(_statusLabel(localization, milestone.status)),
+                backgroundColor: _statusColor(context, milestone.status),
+              ),
+            ),
+          ),
+        ),
+        if (milestones.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              localization.t('tapCycleStatus'),
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          )
+      ],
+    );
+  }
+
+  String _statusLabel(AppLocalizations localization, MilestoneStatus status) {
+    switch (status) {
+      case MilestoneStatus.progress:
+        return localization.t('statusProgress');
+      case MilestoneStatus.done:
+        return localization.t('statusDone');
+      default:
+        return localization.t('statusPlanned');
+    }
+  }
+
+  Color _statusColor(BuildContext context, MilestoneStatus status) {
+    switch (status) {
+      case MilestoneStatus.progress:
+        return Theme.of(context).primaryColor.withOpacity(0.3);
+      case MilestoneStatus.done:
+        return Colors.green.withOpacity(0.3);
+      default:
+        return Colors.amber.withOpacity(0.3);
+    }
+  }
+
+  String _formatDate(DateTime date) => '${date.day}/${date.month}';
+}
+
+class _BudgetStat extends StatelessWidget {
+  const _BudgetStat({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(value, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white)),
+        Text(label, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.white70)),
       ],
     );
   }

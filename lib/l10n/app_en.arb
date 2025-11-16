@@ -111,5 +111,20 @@
   "activeEvents": "Active events",
   "tasksDueSoon": "Due this week",
   "digestTitle": "Morning digest",
-  "digestDescription": "Send me a local notification summary"
+  "digestDescription": "Send me a local notification summary",
+  "budgetHealth": "Budget health",
+  "budgetPlanned": "Planned",
+  "budgetUsed": "Spent",
+  "budgetRemaining": "Remaining",
+  "milestones": "Milestones",
+  "openRoadmap": "Open roadmap",
+  "roadmap": "Roadmap",
+  "roadmapEmpty": "No milestones yet",
+  "statusPlanned": "Planned",
+  "statusProgress": "In progress",
+  "statusDone": "Done",
+  "tapCycleStatus": "Tap to cycle status",
+  "roadmapHint": "Filter and update checkpoints to keep every stakeholder aligned.",
+  "nextMilestones": "Next milestones",
+  "overBudgetOnly": "Over budget"
 }

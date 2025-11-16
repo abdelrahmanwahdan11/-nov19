@@ -31,6 +31,12 @@ class HomeScreen extends StatelessWidget {
               IconlyBold.heart),
         ];
         final timeline = controllers.collectionsController.upcomingTimeline(4);
+        final totalBudgetPlanned = controllers.collectionsController.totalBudgetPlanned;
+        final totalBudgetUsed = controllers.collectionsController.totalBudgetUsed;
+        final budgetProgress = totalBudgetPlanned == 0
+            ? 0.0
+            : (totalBudgetUsed / totalBudgetPlanned).clamp(0, 1);
+        final milestonePeek = controllers.collectionsController.upcomingMilestones(3);
         final unread = controllers.notificationsController.unreadCount;
         return RefreshIndicator(
           onRefresh: controllers.collectionsController.refresh,
@@ -162,6 +168,13 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
+              _BudgetHealthCard(
+                progress: budgetProgress,
+                planned: totalBudgetPlanned,
+                used: totalBudgetUsed,
+                localization: localization,
+              ),
+              const SizedBox(height: 24),
               Text(localization.t('autoPlanner'), style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 12),
               SizedBox(
@@ -186,6 +199,30 @@ class HomeScreen extends StatelessWidget {
                         (entry) => Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: _TimelineTile(collection: entry.collection, task: entry.task),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
+              if (milestonePeek.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(child: Text(localization.t('nextMilestones'), style: Theme.of(context).textTheme.titleMedium)),
+                    TextButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed('/collection_roadmap', arguments: milestonePeek.first.collection.id),
+                      child: Text(localization.t('openRoadmap')),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Column(
+                  children: milestonePeek
+                      .map(
+                        (entry) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _MilestoneTile(entry: entry),
                         ),
                       )
                       .toList(),
@@ -384,5 +421,121 @@ class _TimelineTile extends StatelessWidget {
     final hour = date.hour.toString().padLeft(2, '0');
     final minute = date.minute.toString().padLeft(2, '0');
     return '${date.day}/${date.month} $hour:$minute';
+  }
+}
+
+class _BudgetHealthCard extends StatelessWidget {
+  const _BudgetHealthCard({
+    required this.progress,
+    required this.planned,
+    required this.used,
+    required this.localization,
+  });
+
+  final double progress;
+  final double planned;
+  final double used;
+  final AppLocalizations localization;
+
+  @override
+  Widget build(BuildContext context) {
+    final remaining = (planned - used).clamp(0, planned);
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(32),
+        color: Theme.of(context).cardTheme.color,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(localization.t('budgetHealth'), style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 12),
+          LinearProgressIndicator(
+            value: progress,
+            minHeight: 8,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(child: _BudgetTile(label: localization.t('budgetPlanned'), value: planned)),
+              Expanded(child: _BudgetTile(label: localization.t('budgetUsed'), value: used)),
+              Expanded(child: _BudgetTile(label: localization.t('budgetRemaining'), value: remaining)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BudgetTile extends StatelessWidget {
+  const _BudgetTile({required this.label, required this.value});
+
+  final String label;
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(value.toStringAsFixed(0), style: Theme.of(context).textTheme.titleMedium),
+        Text(label, style: Theme.of(context).textTheme.labelSmall),
+      ],
+    );
+  }
+}
+
+class _MilestoneTile extends StatelessWidget {
+  const _MilestoneTile({required this.entry});
+
+  final ({CollectionModel collection, MilestoneModel milestone}) entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context);
+    final milestone = entry.milestone;
+    final collection = entry.collection;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        color: Theme.of(context).cardTheme.color,
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.15),
+            child: const Icon(IconlyLight.flag),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(milestone.title, style: Theme.of(context).textTheme.titleMedium),
+                Text(collection.title, style: Theme.of(context).textTheme.bodySmall),
+                Text('${milestone.date.day}/${milestone.date.month}',
+                    style: Theme.of(context).textTheme.labelSmall),
+              ],
+            ),
+          ),
+          Chip(label: Text(_statusLabel(localization, milestone.status))),
+        ],
+      ),
+    );
+  }
+
+  String _statusLabel(AppLocalizations localization, MilestoneStatus status) {
+    switch (status) {
+      case MilestoneStatus.progress:
+        return localization.t('statusProgress');
+      case MilestoneStatus.done:
+        return localization.t('statusDone');
+      default:
+        return localization.t('statusPlanned');
+    }
   }
 }

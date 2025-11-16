@@ -227,6 +227,10 @@ class _CollectionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = AppScope.of(context).collectionsController;
+    final progress = collection.budgetPlanned == 0
+        ? 0.0
+        : (collection.budgetUsed / collection.budgetPlanned).clamp(0, 1);
+    final overBudget = collection.budgetUsed > collection.budgetPlanned;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -248,6 +252,22 @@ class _CollectionTile extends StatelessWidget {
                 Text(collection.title, style: Theme.of(context).textTheme.titleMedium),
                 Text(collection.description, maxLines: 2, overflow: TextOverflow.ellipsis),
                 Text(collection.location, style: Theme.of(context).textTheme.labelMedium),
+                const SizedBox(height: 6),
+                LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 6,
+                  borderRadius: BorderRadius.circular(8),
+                  color: overBudget ? Colors.redAccent : Theme.of(context).primaryColor,
+                  backgroundColor: Theme.of(context).primaryColor.withOpacity(0.15),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${collection.budgetUsed.toStringAsFixed(0)} / ${collection.budgetPlanned.toStringAsFixed(0)}',
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelSmall
+                      ?.copyWith(color: overBudget ? Colors.redAccent : null),
+                ),
               ],
             ),
           ),

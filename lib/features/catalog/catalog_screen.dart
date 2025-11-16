@@ -87,6 +87,12 @@ class CatalogScreen extends StatelessWidget {
                           onSelected: controller.toggleFavouriteOnly,
                         ),
                         FilterChip(
+                          selected: controller.overBudgetOnly,
+                          label: Text(localization.t('overBudgetOnly')),
+                          onSelected: controller.toggleOverBudget,
+                          avatar: const Icon(IconlyLight.wallet, size: 16),
+                        ),
+                        FilterChip(
                           selected: controller.dateRange != null,
                           label: Text(controller.dateRange == null
                               ? localization.t('dateFilter')
@@ -185,12 +191,53 @@ class _CatalogCard extends StatelessWidget {
                       Text('${collection.date.day}/${collection.date.month}'),
                     ],
                   ),
+                  const SizedBox(height: 8),
+                  _BudgetProgress(collection: collection),
                 ],
               ),
             )
           ],
         ),
       ),
+    );
+  }
+}
+
+class _BudgetProgress extends StatelessWidget {
+  const _BudgetProgress({required this.collection});
+  final CollectionModel collection;
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context);
+    final progress = collection.budgetPlanned == 0
+        ? 0.0
+        : (collection.budgetUsed / collection.budgetPlanned).clamp(0, 1);
+    final remaining = (collection.budgetPlanned - collection.budgetUsed).clamp(0, collection.budgetPlanned);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LinearProgressIndicator(
+          value: progress,
+          minHeight: 6,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                '${localization.t('budgetUsed')}: ${collection.budgetUsed.toStringAsFixed(0)}',
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+            ),
+            Text(
+              '${localization.t('budgetRemaining')}: ${remaining.toStringAsFixed(0)}',
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ],
+        )
+      ],
     );
   }
 }

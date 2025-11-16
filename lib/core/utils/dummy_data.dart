@@ -10,6 +10,9 @@ class CollectionModel {
     required this.date,
     required this.location,
     required this.images,
+    required this.budgetPlanned,
+    required this.budgetUsed,
+    this.milestones = const [],
     this.isFavourite = false,
     this.tasks = const [],
   });
@@ -21,10 +24,20 @@ class CollectionModel {
   final DateTime date;
   final String location;
   final List<String> images;
+  final double budgetPlanned;
+  final double budgetUsed;
+  final List<MilestoneModel> milestones;
   final bool isFavourite;
   final List<TaskModel> tasks;
 
-  CollectionModel copyWith({bool? isFavourite, List<TaskModel>? tasks}) => CollectionModel(
+  CollectionModel copyWith({
+    bool? isFavourite,
+    List<TaskModel>? tasks,
+    double? budgetPlanned,
+    double? budgetUsed,
+    List<MilestoneModel>? milestones,
+  }) =>
+      CollectionModel(
         id: id,
         title: title,
         description: description,
@@ -32,6 +45,9 @@ class CollectionModel {
         date: date,
         location: location,
         images: images,
+        budgetPlanned: budgetPlanned ?? this.budgetPlanned,
+        budgetUsed: budgetUsed ?? this.budgetUsed,
+        milestones: milestones ?? this.milestones,
         isFavourite: isFavourite ?? this.isFavourite,
         tasks: tasks ?? this.tasks,
       );
@@ -62,6 +78,32 @@ class TaskModel {
         date: date ?? this.date,
         assignee: assignee ?? this.assignee,
         completed: completed ?? this.completed,
+      );
+}
+
+enum MilestoneStatus { planned, progress, done }
+
+class MilestoneModel {
+  const MilestoneModel({
+    required this.id,
+    required this.title,
+    required this.subtitle,
+    required this.date,
+    this.status = MilestoneStatus.planned,
+  });
+
+  final String id;
+  final String title;
+  final String subtitle;
+  final DateTime date;
+  final MilestoneStatus status;
+
+  MilestoneModel copyWith({MilestoneStatus? status}) => MilestoneModel(
+        id: id,
+        title: title,
+        subtitle: subtitle,
+        date: date,
+        status: status ?? this.status,
       );
 }
 
@@ -133,6 +175,8 @@ class DummyData {
         'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80',
         'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=400&q=80',
       ],
+      budgetPlanned: 12000,
+      budgetUsed: 6200,
       isFavourite: true,
       tasks: [
         TaskModel(
@@ -150,6 +194,27 @@ class DummyData {
           assignee: 'Omar',
         ),
       ],
+      milestones: [
+        MilestoneModel(
+          id: 'm1',
+          title: 'Route scouting',
+          subtitle: 'Confirm dune entry checkpoints',
+          date: DateTime.now().add(const Duration(days: 1)),
+        ),
+        MilestoneModel(
+          id: 'm2',
+          title: 'Logistics sync',
+          subtitle: 'Share packing list with guests',
+          date: DateTime.now().add(const Duration(days: 3)),
+          status: MilestoneStatus.progress,
+        ),
+        MilestoneModel(
+          id: 'm3',
+          title: 'Sunrise drone test',
+          subtitle: 'Dry-run filming with pilot',
+          date: DateTime.now().add(const Duration(days: 5)),
+        ),
+      ],
     ),
     CollectionModel(
       id: 'c2',
@@ -163,6 +228,8 @@ class DummyData {
         'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80',
         'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=400&q=80',
       ],
+      budgetPlanned: 9000,
+      budgetUsed: 7800,
       tasks: [
         TaskModel(
           id: 't3',
@@ -179,6 +246,27 @@ class DummyData {
           assignee: 'Yousef',
         ),
       ],
+      milestones: [
+        MilestoneModel(
+          id: 'm4',
+          title: 'Guest list freeze',
+          subtitle: 'Confirm RSVPs and allergies',
+          date: DateTime.now().add(const Duration(days: 7)),
+          status: MilestoneStatus.progress,
+        ),
+        MilestoneModel(
+          id: 'm5',
+          title: 'Venue lighting test',
+          subtitle: 'Warm dim + projection alignment',
+          date: DateTime.now().add(const Duration(days: 11)),
+        ),
+        MilestoneModel(
+          id: 'm6',
+          title: 'Chef tasting',
+          subtitle: 'Approve tasting menu + plating',
+          date: DateTime.now().add(const Duration(days: 14)),
+        ),
+      ],
     ),
     CollectionModel(
       id: 'c3',
@@ -192,6 +280,8 @@ class DummyData {
         'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80',
         'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=600&q=80',
       ],
+      budgetPlanned: 15000,
+      budgetUsed: 11000,
       tasks: [
         TaskModel(
           id: 't5',
@@ -206,6 +296,28 @@ class DummyData {
           subtitle: 'Finalize set order and visuals cues',
           date: DateTime.now().add(Duration(days: 2)),
           assignee: 'Layth',
+        ),
+      ],
+      milestones: [
+        MilestoneModel(
+          id: 'm7',
+          title: 'Permit approval',
+          subtitle: 'City official walk-through',
+          date: DateTime.now().add(const Duration(days: 1)),
+          status: MilestoneStatus.done,
+        ),
+        MilestoneModel(
+          id: 'm8',
+          title: 'Stage rig build',
+          subtitle: 'Finalize LED columns',
+          date: DateTime.now().add(const Duration(days: 1)),
+          status: MilestoneStatus.progress,
+        ),
+        MilestoneModel(
+          id: 'm9',
+          title: 'Secret invite drop',
+          subtitle: 'Push AR invites to VIPs',
+          date: DateTime.now().add(const Duration(days: 2)),
         ),
       ],
     ),

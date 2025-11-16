@@ -11,6 +11,7 @@ class CatalogController extends ChangeNotifier {
   String _query = '';
   String _typeFilter = 'All';
   bool _favouriteOnly = false;
+  bool _overBudgetOnly = false;
   DateTimeRange? _dateRange;
 
   List<CollectionModel> get items => _items;
@@ -19,6 +20,7 @@ class CatalogController extends ChangeNotifier {
   String get typeFilter => _typeFilter;
   bool get favouriteOnly => _favouriteOnly;
   DateTimeRange? get dateRange => _dateRange;
+  bool get overBudgetOnly => _overBudgetOnly;
 
   void search(String query) {
     _query = query;
@@ -32,6 +34,11 @@ class CatalogController extends ChangeNotifier {
 
   void toggleFavouriteOnly(bool value) {
     _favouriteOnly = value;
+    _applyFilters();
+  }
+
+  void toggleOverBudget(bool value) {
+    _overBudgetOnly = value;
     _applyFilters();
   }
 
@@ -73,7 +80,8 @@ class CatalogController extends ChangeNotifier {
       final matchesRange = _dateRange == null ||
           (collection.date.isAfter(_dateRange!.start.subtract(const Duration(days: 1))) &&
               collection.date.isBefore(_dateRange!.end.add(const Duration(days: 1))));
-      return matchesQuery && matchesType && matchesFavourite && matchesRange;
+      final matchesBudget = !_overBudgetOnly || collection.budgetUsed > collection.budgetPlanned;
+      return matchesQuery && matchesType && matchesFavourite && matchesRange && matchesBudget;
     }).toList();
     sortBy(_sort, notify: false);
     notifyListeners();

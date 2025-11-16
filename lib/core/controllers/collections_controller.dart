@@ -48,6 +48,18 @@ class CollectionsController extends ChangeNotifier {
   CollectionModel byId(String id) => DummyData.collections.firstWhere((element) => element.id == id);
 
   List<TaskModel> tasksFor(String id) => byId(id).tasks;
+  List<MilestoneModel> milestonesFor(String id) => byId(id).milestones;
+
+  double budgetProgress(String id) {
+    final collection = byId(id);
+    if (collection.budgetPlanned == 0) return 0;
+    return (collection.budgetUsed / collection.budgetPlanned).clamp(0, 1);
+  }
+
+  double get totalBudgetPlanned =>
+      DummyData.collections.fold(0, (previousValue, element) => previousValue + element.budgetPlanned);
+  double get totalBudgetUsed =>
+      DummyData.collections.fold(0, (previousValue, element) => previousValue + element.budgetUsed);
 
   Future<void> refresh() async {
     _isLoading = true;
@@ -115,6 +127,20 @@ class CollectionsController extends ChangeNotifier {
     _replaceCollection(collection.copyWith(tasks: updatedTasks));
   }
 
+  void cycleMilestoneStatus(String collectionId, String milestoneId) {
+    final collection = byId(collectionId);
+    final updated = collection.milestones.map((milestone) {
+      if (milestone.id != milestoneId) return milestone;
+      final next = switch (milestone.status) {
+        MilestoneStatus.planned => MilestoneStatus.progress,
+        MilestoneStatus.progress => MilestoneStatus.done,
+        MilestoneStatus.done => MilestoneStatus.planned,
+      };
+      return milestone.copyWith(status: next);
+    }).toList();
+    _replaceCollection(collection.copyWith(milestones: updated));
+  }
+
   Map<DateTime, List<TaskModel>> groupedTasks(String collectionId) {
     final tasks = tasksFor(collectionId);
     final Map<DateTime, List<TaskModel>> grouped = {};
@@ -154,6 +180,21 @@ class CollectionsController extends ChangeNotifier {
     entries.sort((a, b) => a.task.date.compareTo(b.task.date));
     return entries
         .where((entry) => entry.task.date.isAfter(DateTime.now().subtract(const Duration(hours: 1))))
+        .take(take)
+        .toList();
+  }
+
+  List<({CollectionModel collection, MilestoneModel milestone})> upcomingMilestones([int take = 3]) {
+    final entries = <({CollectionModel collection, MilestoneModel milestone})>[];
+    for (final collection in DummyData.collections) {
+      for (final milestone in collection.milestones) {
+        entries.add((collection: collection, milestone: milestone));
+      }
+    }
+    entries.sort((a, b) => a.milestone.date.compareTo(b.milestone.date));
+    return entries
+        .where((entry) => entry.milestone.date
+            .isAfter(DateTime.now().subtract(const Duration(days: 1))))
         .take(take)
         .toList();
   }
