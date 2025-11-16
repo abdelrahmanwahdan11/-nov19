@@ -205,6 +205,10 @@ class _SummaryTab extends StatelessWidget {
           const SizedBox(height: 16),
           _LogisticsPeekCard(collectionId: collection.id),
         ],
+        if (collection.documents.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _DocumentPeekCard(collectionId: collection.id),
+        ],
         if (itinerary.isNotEmpty) ...[
           const SizedBox(height: 16),
           Row(
@@ -724,6 +728,102 @@ class _LogisticsPeekCard extends StatelessWidget {
       case LogisticsType.experience:
         return IconlyLight.activity;
     }
+  }
+}
+
+class _DocumentPeekCard extends StatelessWidget {
+  const _DocumentPeekCard({required this.collectionId});
+
+  final String collectionId;
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context);
+    final controller = AppScope.of(context).collectionsController;
+    final documents = controller.documentsFor(collectionId);
+    final summary = controller.documentStatusSummary(collectionId);
+    final pending = (summary[DocumentStatus.draft] ?? 0) + (summary[DocumentStatus.review] ?? 0);
+    final approved = summary[DocumentStatus.approved] ?? 0;
+    final recent = [...documents]
+      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        color: Theme.of(context).cardColor.withOpacity(0.95),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(localization.t('documentsPeekTitle'), style: Theme.of(context).textTheme.titleMedium)),
+              TextButton.icon(
+                onPressed: () => Navigator.of(context)
+                    .pushNamed('/collection_documents', arguments: collectionId),
+                icon: const Icon(IconlyLight.paper),
+                label: Text(localization.t('documentsOpenList')),
+              )
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(localization.t('documentsPeekSubtitle')),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _DocumentStat(
+                  label: localization.t('documentsPendingLabel'),
+                  value: '$pending',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _DocumentStat(
+                  label: localization.t('documentsApprovedLabel'),
+                  value: '$approved',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: recent.take(3).map((doc) {
+              final updated = MaterialLocalizations.of(context).formatShortDate(doc.updatedAt);
+              return Chip(
+                label: Text('${doc.title} · $updated'),
+              );
+            }).toList(),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class _DocumentStat extends StatelessWidget {
+  const _DocumentStat({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: Theme.of(context).primaryColor.withOpacity(0.12),
+      ),
+      child: Column(
+        children: [
+          Text(value, style: Theme.of(context).textTheme.headlineSmall),
+          Text(label, textAlign: TextAlign.center),
+        ],
+      ),
+    );
   }
 }
 

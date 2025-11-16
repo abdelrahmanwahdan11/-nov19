@@ -230,6 +230,7 @@ class _CollectionTile extends StatelessWidget {
         : (collection.budgetUsed / collection.budgetPlanned).clamp(0, 1);
     final overBudget = collection.budgetUsed > collection.budgetPlanned;
     final nextSlot = controller.nextItinerarySlot(collection.id);
+    final pendingDocs = controller.pendingDocumentCount(collection.id);
     final timeLabel = nextSlot == null
         ? null
         : MaterialLocalizations.of(context).formatTimeOfDay(nextSlot.slot.time);
@@ -304,6 +305,37 @@ class _CollectionTile extends StatelessWidget {
                       onPressed: () => Navigator.of(context)
                           .pushNamed('/collection_itinerary', arguments: collection.id),
                       child: Text(localization.t('openItinerary')),
+                    ),
+                  ),
+                ],
+                if (pendingDocs > 0) ...[
+                  const SizedBox(height: 6),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context)
+                        .pushNamed('/collection_documents', arguments: collection.id),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Theme.of(context).primaryColor.withOpacity(0.12),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(IconlyLight.paper, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '${localization.t('documentsPendingLabel')}: $pendingDocs',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ),
+                          Text(localization.t('documentsReviewCta'),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(color: Theme.of(context).primaryColor)),
+                        ],
+                      ),
                     ),
                   ),
                 ],

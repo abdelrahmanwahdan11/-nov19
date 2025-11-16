@@ -42,6 +42,7 @@ class HomeScreen extends StatelessWidget {
         final itineraryPeek = controllers.collectionsController.upcomingItinerarySlots(4);
         final guestFollowUps = controllers.collectionsController.pendingGuests(5);
         final vendorFollowUps = controllers.collectionsController.vendorFollowUps(5);
+        final documentFollowUps = controllers.collectionsController.documentFollowUps(5);
         final logisticsPeek = controllers.collectionsController.upcomingLogistics(5);
         final budgetPressure = controllers.collectionsController.budgetPressureLines(4);
         final unread = controllers.notificationsController.unreadCount;
@@ -341,6 +342,49 @@ class HomeScreen extends StatelessWidget {
                                 .updateVendorStatus(entry.collection.id, entry.vendor.id, nextStatus),
                         onOpen: () => Navigator.of(context)
                             .pushNamed('/collection_vendors', arguments: entry.collection.id),
+                      );
+                    },
+                  ),
+                ),
+              ],
+              if (documentFollowUps.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(localization.t('documentsFollowups'),
+                          style: Theme.of(context).textTheme.titleMedium),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed('/collection_documents', arguments: documentFollowUps.first.collection.id),
+                      child: Text(localization.t('documentsOpenList')),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 220,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: documentFollowUps.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (_, index) {
+                      final entry = documentFollowUps[index];
+                      return _DocumentFollowUpCard(
+                        entry: entry,
+                        localization: localization,
+                        onOpen: () => Navigator.of(context)
+                            .pushNamed('/collection_documents', arguments: entry.collection.id),
+                        onAdvance: entry.document.status == DocumentStatus.approved
+                            ? null
+                            : () {
+                                final nextStatus = entry.document.status == DocumentStatus.draft
+                                    ? DocumentStatus.review
+                                    : DocumentStatus.approved;
+                                controllers.collectionsController
+                                    .updateDocumentStatus(entry.collection.id, entry.document.id, nextStatus);
+                              },
                       );
                     },
                   ),
@@ -748,6 +792,96 @@ class _VendorFollowUpCard extends StatelessWidget {
         return Colors.amber.withOpacity(0.2);
       default:
         return Colors.blueGrey.withOpacity(0.2);
+    }
+  }
+}
+
+class _DocumentFollowUpCard extends StatelessWidget {
+  const _DocumentFollowUpCard({
+    required this.entry,
+    required this.localization,
+    required this.onOpen,
+    this.onAdvance,
+  });
+
+  final ({CollectionModel collection, DocumentModel document}) entry;
+  final AppLocalizations localization;
+  final VoidCallback onOpen;
+  final VoidCallback? onAdvance;
+
+  @override
+  Widget build(BuildContext context) {
+    final updatedLabel = MaterialLocalizations.of(context).formatShortDate(entry.document.updatedAt);
+    final statusLabel = _statusLabel(entry.document.status);
+    return Container(
+      width: 240,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        color: Theme.of(context).cardTheme.color,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Image.network(entry.document.preview, height: 90, width: double.infinity, fit: BoxFit.cover),
+          ),
+          const SizedBox(height: 12),
+          Text(entry.collection.title, style: Theme.of(context).textTheme.labelSmall),
+          Text(entry.document.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleMedium),
+          Text('${localization.t('documentsOwnerLabel')} ${entry.document.owner}',
+              style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: [
+              Chip(
+                label: Text(entry.document.category),
+                backgroundColor: Theme.of(context).primaryColor.withOpacity(0.12),
+              ),
+              Chip(
+                label: Text(statusLabel),
+                backgroundColor: Theme.of(context).primaryColor.withOpacity(0.2),
+              ),
+            ],
+          ),
+          const Spacer(),
+          Text('${localization.t('documentsUpdatedLabel')} $updatedLabel',
+              style: Theme.of(context).textTheme.labelSmall),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: onOpen,
+                  child: Text(localization.t('documentsReviewCta')),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                tooltip: localization.t('documentsAdvanceStatus'),
+                onPressed: onAdvance,
+                icon: const Icon(IconlyLight.tick_square),
+              )
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  String _statusLabel(DocumentStatus status) {
+    switch (status) {
+      case DocumentStatus.draft:
+        return localization.t('documentsStatusDraft');
+      case DocumentStatus.review:
+        return localization.t('documentsStatusReview');
+      case DocumentStatus.approved:
+        return localization.t('documentsStatusApproved');
     }
   }
 }

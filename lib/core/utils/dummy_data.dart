@@ -65,6 +65,50 @@ class ItineraryDayModel {
       );
 }
 
+enum DocumentStatus { draft, review, approved }
+
+class DocumentModel {
+  const DocumentModel({
+    required this.id,
+    required this.title,
+    required this.category,
+    required this.owner,
+    required this.updatedAt,
+    required this.status,
+    required this.preview,
+    this.sizeMb = 0,
+  });
+
+  final String id;
+  final String title;
+  final String category;
+  final String owner;
+  final DateTime updatedAt;
+  final DocumentStatus status;
+  final String preview;
+  final double sizeMb;
+
+  DocumentModel copyWith({
+    String? title,
+    String? category,
+    String? owner,
+    DateTime? updatedAt,
+    DocumentStatus? status,
+    String? preview,
+    double? sizeMb,
+  }) =>
+      DocumentModel(
+        id: id,
+        title: title ?? this.title,
+        category: category ?? this.category,
+        owner: owner ?? this.owner,
+        updatedAt: updatedAt ?? this.updatedAt,
+        status: status ?? this.status,
+        preview: preview ?? this.preview,
+        sizeMb: sizeMb ?? this.sizeMb,
+      );
+}
+
 class CollectionModel {
   CollectionModel({
     required this.id,
@@ -85,6 +129,7 @@ class CollectionModel {
     this.vendors = const [],
     this.logistics = const [],
     this.budgetLines = const [],
+    this.documents = const [],
   });
 
   final String id;
@@ -105,6 +150,7 @@ class CollectionModel {
   final List<VendorModel> vendors;
   final List<LogisticItemModel> logistics;
   final List<BudgetLineModel> budgetLines;
+  final List<DocumentModel> documents;
 
   CollectionModel copyWith({
     bool? isFavourite,
@@ -118,6 +164,7 @@ class CollectionModel {
     List<VendorModel>? vendors,
     List<LogisticItemModel>? logistics,
     List<BudgetLineModel>? budgetLines,
+    List<DocumentModel>? documents,
   }) =>
       CollectionModel(
         id: id,
@@ -138,6 +185,7 @@ class CollectionModel {
         vendors: vendors ?? this.vendors,
         logistics: logistics ?? this.logistics,
         budgetLines: budgetLines ?? this.budgetLines,
+        documents: documents ?? this.documents,
       );
 }
 
@@ -481,6 +529,38 @@ class DummyData {
           planned: 2000,
           spent: 1400,
           note: 'Insurance and ranger standby.',
+        ),
+      ],
+      documents: [
+        DocumentModel(
+          id: 'c1doc1',
+          title: 'Dune permit pack',
+          category: 'Permits',
+          owner: 'Laila',
+          updatedAt: DateTime.now().subtract(const Duration(days: 1)),
+          status: DocumentStatus.review,
+          preview: AppAssets.docPlaceholder,
+          sizeMb: 2.1,
+        ),
+        DocumentModel(
+          id: 'c1doc2',
+          title: 'Sunrise catering brief',
+          category: 'Food & Beverage',
+          owner: 'Omar',
+          updatedAt: DateTime.now().subtract(const Duration(hours: 10)),
+          status: DocumentStatus.draft,
+          preview: AppAssets.docPlaceholder,
+          sizeMb: 3.4,
+        ),
+        DocumentModel(
+          id: 'c1doc3',
+          title: 'Guest waiver template',
+          category: 'Guests',
+          owner: 'Sara',
+          updatedAt: DateTime.now().subtract(const Duration(days: 2)),
+          status: DocumentStatus.approved,
+          preview: AppAssets.docPlaceholder,
+          sizeMb: 0.9,
         ),
       ],
       isFavourite: true,
@@ -833,6 +913,82 @@ class DummyData {
           planned: 1400,
           spent: 500,
           note: 'Personalized keepsakes and packaging.',
+        ),
+      ],
+      documents: [
+        DocumentModel(
+          id: 'c2doc1',
+          title: 'Venue layout',
+          category: 'Logistics',
+          owner: 'Maya',
+          updatedAt: DateTime.now().subtract(const Duration(hours: 5)),
+          status: DocumentStatus.review,
+          preview: AppAssets.docPlaceholder,
+          sizeMb: 4.2,
+        ),
+        DocumentModel(
+          id: 'c2doc2',
+          title: 'Entertainment rider',
+          category: 'Vendors',
+          owner: 'Rashed',
+          updatedAt: DateTime.now().subtract(const Duration(days: 1, hours: 3)),
+          status: DocumentStatus.draft,
+          preview: AppAssets.docPlaceholder,
+          sizeMb: 1.6,
+        ),
+      ],
+      documents: [
+        DocumentModel(
+          id: 'c3doc1',
+          title: 'Anniversary speech cues',
+          category: 'Program',
+          owner: 'Noura',
+          updatedAt: DateTime.now().subtract(const Duration(days: 2, hours: 4)),
+          status: DocumentStatus.approved,
+          preview: AppAssets.docPlaceholder,
+          sizeMb: 0.8,
+        ),
+        DocumentModel(
+          id: 'c3doc2',
+          title: 'Photo booth checklist',
+          category: 'Vendors',
+          owner: 'Hamad',
+          updatedAt: DateTime.now().subtract(const Duration(hours: 8)),
+          status: DocumentStatus.review,
+          preview: AppAssets.docPlaceholder,
+          sizeMb: 1.1,
+        ),
+      ],
+      documents: [
+        DocumentModel(
+          id: 'c4doc1',
+          title: 'Venue insurance letter',
+          category: 'Permits',
+          owner: 'Farah',
+          updatedAt: DateTime.now().subtract(const Duration(days: 3)),
+          status: DocumentStatus.review,
+          preview: AppAssets.docPlaceholder,
+          sizeMb: 2.7,
+        ),
+        DocumentModel(
+          id: 'c4doc2',
+          title: 'Menu tasting feedback',
+          category: 'Food & Beverage',
+          owner: 'Yousef',
+          updatedAt: DateTime.now().subtract(const Duration(hours: 12)),
+          status: DocumentStatus.draft,
+          preview: AppAssets.docPlaceholder,
+          sizeMb: 1.5,
+        ),
+        DocumentModel(
+          id: 'c4doc3',
+          title: 'Decor inspiration deck',
+          category: 'Design',
+          owner: 'Mina',
+          updatedAt: DateTime.now().subtract(const Duration(days: 1, hours: 6)),
+          status: DocumentStatus.approved,
+          preview: AppAssets.docPlaceholder,
+          sizeMb: 5.2,
         ),
       ],
       tasks: [

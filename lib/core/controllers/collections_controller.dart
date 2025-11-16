@@ -55,6 +55,7 @@ class CollectionsController extends ChangeNotifier {
   List<VendorModel> vendorsFor(String id) => byId(id).vendors;
   List<LogisticItemModel> logisticsFor(String id) => byId(id).logistics;
   List<BudgetLineModel> budgetLinesFor(String id) => byId(id).budgetLines;
+  List<DocumentModel> documentsFor(String id) => byId(id).documents;
 
   Map<GuestStatus, int> guestStatusSummary(String id) {
     final guests = guestsFor(id);
@@ -85,6 +86,20 @@ class CollectionsController extends ChangeNotifier {
       summary[item.status] = (summary[item.status] ?? 0) + 1;
     }
     return summary;
+  }
+
+  Map<DocumentStatus, int> documentStatusSummary(String id) {
+    final documents = documentsFor(id);
+    final summary = {for (final status in DocumentStatus.values) status: 0};
+    for (final document in documents) {
+      summary[document.status] = (summary[document.status] ?? 0) + 1;
+    }
+    return summary;
+  }
+
+  int pendingDocumentCount(String id) {
+    final summary = documentStatusSummary(id);
+    return (summary[DocumentStatus.draft] ?? 0) + (summary[DocumentStatus.review] ?? 0);
   }
 
   LogisticItemModel? nextLogistic(String id) {
@@ -567,5 +582,33 @@ class CollectionsController extends ChangeNotifier {
     }
     entries.sort((a, b) => a.vendor.dueDate.compareTo(b.vendor.dueDate));
     return entries.take(take).toList();
+  }
+
+  List<({CollectionModel collection, DocumentModel document})> documentFollowUps([int take = 4]) {
+    final entries = <({CollectionModel collection, DocumentModel document})>[];
+    for (final collection in DummyData.collections) {
+      for (final document in collection.documents) {
+        final needsReview = document.status == DocumentStatus.draft || document.status == DocumentStatus.review;
+        if (needsReview) {
+          entries.add((collection: collection, document: document));
+        }
+      }
+    }
+    entries.sort((a, b) => b.document.updatedAt.compareTo(a.document.updatedAt));
+    return entries.take(take).toList();
+  }
+
+  void updateDocumentStatus(String collectionId, String documentId, DocumentStatus status) {
+    final collection = byId(collectionId);
+    final updatedDocs = collection.documents
+        .map((doc) => doc.id == documentId ? doc.copyWith(status: status, updatedAt: DateTime.now()) : doc)
+        .toList();
+    _replaceCollection(collection.copyWith(documents: updatedDocs));
+  }
+
+  void addDocument(String collectionId, DocumentModel document) {
+    final collection = byId(collectionId);
+    final updatedDocs = [...collection.documents, document];
+    _replaceCollection(collection.copyWith(documents: updatedDocs));
   }
 }
