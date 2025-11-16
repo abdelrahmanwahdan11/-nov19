@@ -94,6 +94,12 @@ class SettingsScreen extends StatelessWidget {
                 value: settings.reduceAnimations,
                 onChanged: settings.toggleReduceAnimations,
               ),
+              SwitchListTile(
+                title: Text(localization.t('digestTitle')),
+                subtitle: Text(localization.t('digestDescription')),
+                value: settings.digestEnabled,
+                onChanged: settings.toggleDigest,
+              ),
               const SizedBox(height: 24),
               ListTile(
                 title: Text(localization.t('about')),

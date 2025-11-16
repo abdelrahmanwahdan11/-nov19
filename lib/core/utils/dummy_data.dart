@@ -92,6 +92,33 @@ class GalleryItem {
       );
 }
 
+class NuviqNotification {
+  const NuviqNotification({
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.type,
+    required this.time,
+    this.read = false,
+  });
+
+  final String id;
+  final String title;
+  final String body;
+  final String type;
+  final DateTime time;
+  final bool read;
+
+  NuviqNotification copyWith({bool? read}) => NuviqNotification(
+        id: id,
+        title: title,
+        body: body,
+        type: type,
+        time: time,
+        read: read ?? this.read,
+      );
+}
+
 class DummyData {
   static List<CollectionModel> collections = [
     CollectionModel(
@@ -247,5 +274,38 @@ class DummyData {
     Color(0xFF56CFE1),
     Color(0xFFF15BB5),
     Color(0xFF6D67E4),
+  ];
+
+  static List<NuviqNotification> notifications = [
+    NuviqNotification(
+      id: 'n1',
+      title: 'Tasks synced',
+      body: 'Laila confirmed jeep bookings for the desert trip.',
+      type: 'Planning',
+      time: DateTime.now().subtract(const Duration(minutes: 30)),
+    ),
+    NuviqNotification(
+      id: 'n2',
+      title: 'Moodboard update',
+      body: 'New rooftop renders were added to Secret Rooftop Party.',
+      type: 'Gallery',
+      time: DateTime.now().subtract(const Duration(hours: 2)),
+    ),
+    NuviqNotification(
+      id: 'n3',
+      title: 'Task due soon',
+      body: 'Projection mapping storyboard review tomorrow.',
+      type: 'Tasks',
+      time: DateTime.now().subtract(const Duration(hours: 5)),
+      read: true,
+    ),
+    NuviqNotification(
+      id: 'n4',
+      title: 'Anniversary insights',
+      body: 'Your anniversary dinner has 80% tasks confirmed.',
+      type: 'Planning',
+      time: DateTime.now().subtract(const Duration(days: 1)),
+      read: true,
+    ),
   ];
 }

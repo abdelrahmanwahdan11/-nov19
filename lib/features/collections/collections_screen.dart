@@ -74,6 +74,71 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
                   onChanged: collectionsController.search,
                 ),
                 const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        value: collectionsController.sortOption,
+                        decoration: InputDecoration(labelText: localization.t('sort')),
+                        items: [
+                          DropdownMenuItem(value: 'Newest', child: Text(localization.t('newest'))),
+                          DropdownMenuItem(value: 'Oldest', child: Text(localization.t('oldest'))),
+                          DropdownMenuItem(value: 'A-Z', child: Text(localization.t('az'))),
+                        ],
+                        onChanged: (value) => collectionsController.sortBy(value ?? 'Newest'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    TextButton(
+                      onPressed: collectionsController.resetFilters,
+                      child: Text(localization.t('clear')),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 12,
+                  children: [
+                    FilterChip(
+                      label: Text(localization.t('favouriteOnly')),
+                      selected: collectionsController.favouriteOnly,
+                      onSelected: collectionsController.toggleFavouriteFilter,
+                    ),
+                    FilterChip(
+                      label: Text(collectionsController.dateRange == null
+                          ? localization.t('dateFilter')
+                          : '${collectionsController.dateRange!.start.month}/${collectionsController.dateRange!.start.day} - '
+                              '${collectionsController.dateRange!.end.month}/${collectionsController.dateRange!.end.day}'),
+                      selected: collectionsController.dateRange != null,
+                      onSelected: (_) async {
+                        final range = await showDateRangePicker(
+                          context: context,
+                          firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                          initialDateRange: collectionsController.dateRange,
+                        );
+                        collectionsController.updateDateRange(range);
+                      },
+                    )
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    _StatPill(
+                      label: localization.t('activeEvents'),
+                      value: collectionsController.activeCollections.toString(),
+                      icon: IconlyBold.discovery,
+                    ),
+                    const SizedBox(width: 12),
+                    _StatPill(
+                      label: localization.t('tasksDueSoon'),
+                      value: collectionsController.upcomingTasksCount.toString(),
+                      icon: IconlyBold.time_circle,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
                 Wrap(
                   spacing: 12,
                   children: tabs
@@ -110,6 +175,45 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _StatPill extends StatelessWidget {
+  const _StatPill({required this.label, required this.value, required this.icon});
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          color: Theme.of(context).cardTheme.color,
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: Theme.of(context).primaryColor.withOpacity(0.2),
+              child: Icon(icon, color: Theme.of(context).primaryColor),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(value, style: Theme.of(context).textTheme.titleLarge),
+                  Text(label, style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

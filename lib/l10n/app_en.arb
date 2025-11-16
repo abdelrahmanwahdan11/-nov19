@@ -96,5 +96,20 @@
   "guest": "Guest",
   "welcomeBack": "Welcome back",
   "autoPlanner": "Nuviq auto planner",
-  "aiLater": "AI assistant will be plugged soon."
+  "aiLater": "AI assistant will be plugged soon.",
+  "insightsTitle": "Planner insights",
+  "favouriteCollectionsShort": "Favourite sets",
+  "timelineFocus": "Timeline focus",
+  "notifications": "Notifications",
+  "notificationsSubtitle": "Live updates from your crews",
+  "notificationsEmpty": "No notifications yet",
+  "markAllRead": "Mark all read",
+  "minutesAgo": "%d min ago",
+  "hoursAgo": "%d h ago",
+  "daysAgo": "%d d ago",
+  "planning": "Planning",
+  "activeEvents": "Active events",
+  "tasksDueSoon": "Due this week",
+  "digestTitle": "Morning digest",
+  "digestDescription": "Send me a local notification summary"
 }

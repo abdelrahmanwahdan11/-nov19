@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
 
@@ -6,6 +7,7 @@ import '../../core/controllers/app_scope.dart';
 import '../../core/localization/app_localizations.dart';
 import '../../core/utils/dummy_data.dart';
 import '../../core/widgets/skeleton_box.dart';
+import 'widgets/notifications_sheet.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -15,136 +17,214 @@ class HomeScreen extends StatelessWidget {
     final localization = AppLocalizations.of(context);
     final controllers = AppScope.of(context);
     final heroCollection = DummyData.collections.first;
-    return RefreshIndicator(
-      onRefresh: controllers.collectionsController.refresh,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(24, 48, 24, 120),
-        children: [
-          Row(
+    final listenable = Listenable.merge([
+      controllers.collectionsController,
+      controllers.notificationsController,
+    ]);
+    return AnimatedBuilder(
+      animation: listenable,
+      builder: (context, _) {
+        final stats = [
+          (localization.t('activeEvents'), controllers.collectionsController.activeCollections.toString(), IconlyBold.ticket),
+          (localization.t('tasksDueSoon'), controllers.collectionsController.upcomingTasksCount.toString(), IconlyBold.time_circle),
+          (localization.t('favouriteCollectionsShort'), controllers.collectionsController.favouriteCount.toString(),
+              IconlyBold.heart),
+        ];
+        final timeline = controllers.collectionsController.upcomingTimeline(4);
+        final unread = controllers.notificationsController.unreadCount;
+        return RefreshIndicator(
+          onRefresh: controllers.collectionsController.refresh,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(24, 48, 24, 120),
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      localization.t('goodMorning'),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white70),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          localization.t('goodMorning'),
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white70),
+                        ),
+                        Text(
+                          localization.t('appName'),
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      localization.t('appName'),
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
+                  ),
+                  IconButton(
+                    onPressed: () => _openNotifications(context),
+                    icon: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const Icon(IconlyLight.notification),
+                        if (unread > 0)
+                          Positioned(
+                            right: -4,
+                            top: -4,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text('$unread', style: const TextStyle(color: Colors.white, fontSize: 10)),
+                            ),
                           ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 8),
+                  CircleAvatar(
+                    radius: 26,
+                    backgroundImage: NetworkImage(AppAssets.profile),
+                  ),
+                ],
               ),
-              CircleAvatar(
-                radius: 26,
-                backgroundImage: NetworkImage(AppAssets.profile),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          GestureDetector(
-            onTap: () => Navigator.of(context).pushNamed('/collection_details', arguments: heroCollection.id),
-            child: Hero(
-              tag: heroCollection.id,
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(36),
-                  gradient: LinearGradient(
-                    colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withOpacity(0.6)],
+              const SizedBox(height: 24),
+              GestureDetector(
+                onTap: () => Navigator.of(context).pushNamed('/collection_details', arguments: heroCollection.id),
+                child: Hero(
+                  tag: heroCollection.id,
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(36),
+                      gradient: LinearGradient(
+                        colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withOpacity(0.6)],
+                      ),
+                    ),
+                    height: 260,
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(32),
+                            child: Image.network(heroCollection.images.first, fit: BoxFit.cover),
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(32),
+                            gradient: LinearGradient(
+                              colors: [Colors.black.withOpacity(0.5), Colors.transparent],
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 20,
+                          left: 20,
+                          right: 20,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                heroCollection.title,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineSmall
+                                    ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
+                              Text(heroCollection.description,
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                height: 260,
-                child: Stack(
+              ),
+              const SizedBox(height: 16),
+              Text(localization.t('insightsTitle'), style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 110,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (_, index) {
+                    final stat = stats[index];
+                    return _InsightCard(
+                      label: stat.$1,
+                      value: stat.$2,
+                      icon: stat.$3,
+                    );
+                  },
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemCount: stats.length,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(localization.t('autoPlanner'), style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 120,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
                   children: [
-                    Positioned.fill(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(32),
-                        child: Image.network(heroCollection.images.first, fit: BoxFit.cover),
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(32),
-                        gradient: LinearGradient(
-                          colors: [Colors.black.withOpacity(0.5), Colors.transparent],
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 20,
-                      left: 20,
-                      right: 20,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            heroCollection.title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
-                          Text(heroCollection.description,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70)),
-                        ],
-                      ),
-                    ),
+                    _QuickCard(title: localization.t('upcomingTrip'), icon: IconlyLight.paper_plus),
+                    _QuickCard(title: localization.t('partyEvent'), icon: IconlyLight.game),
+                    _QuickCard(title: localization.t('anniversary'), icon: IconlyLight.heart),
+                    _QuickCard(title: localization.t('createManual'), icon: IconlyLight.edit),
                   ],
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(localization.t('autoPlanner'), style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 120,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _QuickCard(title: localization.t('upcomingTrip'), icon: IconlyLight.paper_plus),
-                _QuickCard(title: localization.t('partyEvent'), icon: IconlyLight.game),
-                _QuickCard(title: localization.t('anniversary'), icon: IconlyLight.heart),
-                _QuickCard(title: localization.t('createManual'), icon: IconlyLight.edit),
+              if (timeline.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Text(localization.t('timelineFocus'), style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 12),
+                Column(
+                  children: timeline
+                      .map(
+                        (entry) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _TimelineTile(collection: entry.collection, task: entry.task),
+                        ),
+                      )
+                      .toList(),
+                ),
               ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(localization.t('collections'), style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 12),
-          AnimatedBuilder(
-            animation: controllers.collectionsController,
-            builder: (context, _) {
-              if (controllers.collectionsController.isLoading) {
-                return Column(
+              const SizedBox(height: 24),
+              Text(localization.t('collections'), style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 12),
+              if (controllers.collectionsController.isLoading)
+                Column(
                   children: const [
                     SkeletonBox(),
                     SizedBox(height: 12),
                     SkeletonBox(),
                   ],
-                );
-              }
-              return Column(
-                children: controllers.collectionsController.visible
-                    .take(3)
-                    .map((collection) => Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: _CollectionCard(collection: collection),
-                        ))
-                    .toList(),
-              );
-            },
+                )
+              else
+                Column(
+                  children: controllers.collectionsController.visible
+                      .take(3)
+                      .map((collection) => Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: _CollectionCard(collection: collection),
+                          ))
+                      .toList(),
+                ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
+    );
+  }
+
+  void _openNotifications(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const NotificationsSheet(),
     );
   }
 }
@@ -183,6 +263,9 @@ class _CollectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final totalTasks = collection.tasks.length;
+    final completed = collection.tasks.where((task) => task.completed).length;
+    final progress = totalTasks == 0 ? 0.0 : completed / totalTasks;
     return GestureDetector(
       onTap: () => Navigator.of(context).pushNamed('/collection_details', arguments: collection.id),
       child: Container(
@@ -210,6 +293,16 @@ class _CollectionCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 8),
+                  if (totalTasks > 0)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        LinearProgressIndicator(value: progress, minHeight: 6, borderRadius: BorderRadius.circular(8)),
+                        const SizedBox(height: 4),
+                        Text('${(progress * 100).round()}% ${AppLocalizations.of(context).t('tasks')}'),
+                      ],
+                    ),
                 ],
               ),
             )
@@ -217,5 +310,79 @@ class _CollectionCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _InsightCard extends StatelessWidget {
+  const _InsightCard({required this.label, required this.value, required this.icon});
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 150,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        color: Theme.of(context).cardTheme.color,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: Theme.of(context).primaryColor),
+          const Spacer(),
+          Text(value, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
+        ],
+      ),
+    );
+  }
+}
+
+class _TimelineTile extends StatelessWidget {
+  const _TimelineTile({required this.collection, required this.task});
+
+  final CollectionModel collection;
+  final TaskModel task;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        color: Theme.of(context).cardTheme.color,
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.2),
+            child: const Icon(IconlyLight.time_circle),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(task.title, style: Theme.of(context).textTheme.titleMedium),
+                Text(collection.title, style: Theme.of(context).textTheme.bodySmall),
+                Text('${AppLocalizations.of(context).t('dueDate')}: ${_formatTime(task.date)}',
+                    style: Theme.of(context).textTheme.labelSmall),
+              ],
+            ),
+          ),
+          Chip(label: Text(task.assignee)),
+        ],
+      ),
+    );
+  }
+
+  String _formatTime(DateTime date) {
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    return '${date.day}/${date.month} $hour:$minute';
   }
 }

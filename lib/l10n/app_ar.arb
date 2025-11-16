@@ -96,5 +96,20 @@
   "guest": "ضيف",
   "welcomeBack": "مرحباً بعودتك",
   "autoPlanner": "مخطط نوفيق الذكي",
-  "aiLater": "سيتم إضافة المساعد قريباً."
+  "aiLater": "سيتم إضافة المساعد قريباً.",
+  "insightsTitle": "رؤى المخطط",
+  "favouriteCollectionsShort": "المفضلة",
+  "timelineFocus": "خط الزمن",
+  "notifications": "الإشعارات",
+  "notificationsSubtitle": "آخر التحديثات من فرقك",
+  "notificationsEmpty": "لا توجد إشعارات بعد",
+  "markAllRead": "تحديد الكل كمقروء",
+  "minutesAgo": "منذ %d دقيقة",
+  "hoursAgo": "منذ %d ساعة",
+  "daysAgo": "منذ %d يوم",
+  "planning": "التخطيط",
+  "activeEvents": "فعاليات نشطة",
+  "tasksDueSoon": "مستحقة هذا الأسبوع",
+  "digestTitle": "ملخص الصباح",
+  "digestDescription": "أرسل لي تنبيهاً ملخصاً محلياً"
 }

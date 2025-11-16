@@ -4,6 +4,7 @@ import 'auth_controller.dart';
 import 'catalog_controller.dart';
 import 'collections_controller.dart';
 import 'gallery_controller.dart';
+import 'notifications_controller.dart';
 import 'onboarding_controller.dart';
 import 'settings_controller.dart';
 import 'theme_controller.dart';
@@ -16,7 +17,8 @@ class AppControllers {
         collectionsController = CollectionsController(),
         galleryController = GalleryController(),
         catalogController = CatalogController(),
-        settingsController = SettingsController(prefs);
+        settingsController = SettingsController(prefs),
+        notificationsController = NotificationsController();
 
   final SharedPreferences prefs;
   final ThemeController themeController;
@@ -26,4 +28,5 @@ class AppControllers {
   final GalleryController galleryController;
   final CatalogController catalogController;
   final SettingsController settingsController;
+  final NotificationsController notificationsController;
 }
