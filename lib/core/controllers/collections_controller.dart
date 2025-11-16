@@ -53,6 +53,7 @@ class CollectionsController extends ChangeNotifier {
   List<ItineraryDayModel> itineraryFor(String id) => byId(id).itinerary;
   List<GuestModel> guestsFor(String id) => byId(id).guests;
   List<VendorModel> vendorsFor(String id) => byId(id).vendors;
+  List<LogisticItemModel> logisticsFor(String id) => byId(id).logistics;
 
   Map<GuestStatus, int> guestStatusSummary(String id) {
     final guests = guestsFor(id);
@@ -75,6 +76,24 @@ class CollectionsController extends ChangeNotifier {
   }
 
   double vendorTotalCost(String id) => vendorsFor(id).fold(0, (sum, vendor) => sum + vendor.cost);
+
+  Map<LogisticsStatus, int> logisticsStatusSummary(String id) {
+    final logistics = logisticsFor(id);
+    final summary = {for (final status in LogisticsStatus.values) status: 0};
+    for (final item in logistics) {
+      summary[item.status] = (summary[item.status] ?? 0) + 1;
+    }
+    return summary;
+  }
+
+  LogisticItemModel? nextLogistic(String id) {
+    final items = logisticsFor(id)
+        .where((item) => item.start.isAfter(DateTime.now().subtract(const Duration(hours: 3))))
+        .toList()
+      ..sort((a, b) => a.start.compareTo(b.start));
+    if (items.isEmpty) return null;
+    return items.first;
+  }
 
   double budgetProgress(String id) {
     final collection = byId(id);
@@ -275,6 +294,21 @@ class CollectionsController extends ChangeNotifier {
     _replaceCollection(collection.copyWith(vendors: updated));
   }
 
+  void updateLogisticStatus(String collectionId, String logisticId, LogisticsStatus status) {
+    final collection = byId(collectionId);
+    final updated = collection.logistics
+        .map((item) => item.id == logisticId ? item.copyWith(status: status) : item)
+        .toList();
+    _replaceCollection(collection.copyWith(logistics: updated));
+  }
+
+  void addLogistic(String collectionId, LogisticItemModel logistic) {
+    final collection = byId(collectionId);
+    final updated = [...collection.logistics, logistic]
+      ..sort((a, b) => a.start.compareTo(b.start));
+    _replaceCollection(collection.copyWith(logistics: updated));
+  }
+
   Map<JournalMood, int> journalMoodSummary(String collectionId) {
     final entries = journalFor(collectionId);
     final map = {for (final mood in JournalMood.values) mood: 0};
@@ -399,6 +433,20 @@ class CollectionsController extends ChangeNotifier {
         .toList();
     if (filtered.isEmpty) return null;
     return filtered.first;
+  }
+
+  List<({CollectionModel collection, LogisticItemModel item})> upcomingLogistics([int take = 4]) {
+    final entries = <({CollectionModel collection, LogisticItemModel item})>[];
+    final threshold = DateTime.now().subtract(const Duration(hours: 3));
+    for (final collection in DummyData.collections) {
+      for (final item in collection.logistics) {
+        if (item.start.isAfter(threshold)) {
+          entries.add((collection: collection, item: item));
+        }
+      }
+    }
+    entries.sort((a, b) => a.item.start.compareTo(b.item.start));
+    return entries.take(take).toList();
   }
 
   void _applyFilters() {

@@ -200,6 +200,10 @@ class _SummaryTab extends StatelessWidget {
           const SizedBox(height: 16),
           _VendorPeekCard(collectionId: collection.id),
         ],
+        if (collection.logistics.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _LogisticsPeekCard(collectionId: collection.id),
+        ],
         if (itinerary.isNotEmpty) ...[
           const SizedBox(height: 16),
           Row(
@@ -521,6 +525,114 @@ class _VendorPeekCard extends StatelessWidget {
         return localization.t('vendorStatusPaid');
       default:
         return localization.t('vendorStatusScouting');
+    }
+  }
+}
+
+class _LogisticsPeekCard extends StatelessWidget {
+  const _LogisticsPeekCard({required this.collectionId});
+
+  final String collectionId;
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context);
+    final controller = AppScope.of(context).collectionsController;
+    final logistics = controller.logisticsFor(collectionId);
+    final summary = controller.logisticsStatusSummary(collectionId);
+    final formatter = MaterialLocalizations.of(context);
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        color: Theme.of(context).cardColor.withOpacity(0.95),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(localization.t('logisticsPeekTitle'), style: Theme.of(context).textTheme.titleMedium)),
+              TextButton.icon(
+                onPressed: () => Navigator.of(context)
+                    .pushNamed('/collection_logistics', arguments: collectionId),
+                icon: const Icon(IconlyLight.location),
+                label: Text(localization.t('logisticsOpenList')),
+              )
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(localization.t('logisticsPeekSubtitle')),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: LogisticsStatus.values.map((status) {
+              final count = summary[status] ?? 0;
+              return Chip(
+                avatar: Icon(_statusIcon(status), size: 16),
+                label: Text('${_statusLabel(localization, status)} · $count'),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          Column(
+            children: logistics.take(2).map((item) {
+              final date = formatter.formatMediumDate(item.start);
+              final time = formatter.formatTimeOfDay(TimeOfDay.fromDateTime(item.start));
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(
+                  backgroundColor: Theme.of(context).primaryColor.withOpacity(0.15),
+                  child: Icon(_typeIcon(item.type), color: Theme.of(context).primaryColor),
+                ),
+                title: Text(item.title),
+                subtitle: Text('${item.provider} · $date · $time'),
+                trailing: Chip(label: Text(_statusLabel(localization, item.status))),
+              );
+            }).toList(),
+          )
+        ],
+      ),
+    );
+  }
+
+  String _statusLabel(AppLocalizations localization, LogisticsStatus status) {
+    switch (status) {
+      case LogisticsStatus.pending:
+        return localization.t('logisticsStatusPending');
+      case LogisticsStatus.booked:
+        return localization.t('logisticsStatusBooked');
+      case LogisticsStatus.enRoute:
+        return localization.t('logisticsStatusEnRoute');
+      case LogisticsStatus.arrived:
+        return localization.t('logisticsStatusArrived');
+    }
+  }
+
+  IconData _statusIcon(LogisticsStatus status) {
+    switch (status) {
+      case LogisticsStatus.pending:
+        return IconlyLight.time_circle;
+      case LogisticsStatus.booked:
+        return IconlyLight.calendar;
+      case LogisticsStatus.enRoute:
+        return IconlyLight.location;
+      case LogisticsStatus.arrived:
+        return IconlyLight.tick_square;
+    }
+  }
+
+  IconData _typeIcon(LogisticsType type) {
+    switch (type) {
+      case LogisticsType.transport:
+        return IconlyLight.car;
+      case LogisticsType.flight:
+        return IconlyLight.paper_plane;
+      case LogisticsType.stay:
+        return IconlyLight.home;
+      case LogisticsType.experience:
+        return IconlyLight.activity;
     }
   }
 }

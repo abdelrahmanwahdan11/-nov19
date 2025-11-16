@@ -83,6 +83,7 @@ class CollectionModel {
     this.itinerary = const [],
     this.guests = const [],
     this.vendors = const [],
+    this.logistics = const [],
   });
 
   final String id;
@@ -101,6 +102,7 @@ class CollectionModel {
   final List<ItineraryDayModel> itinerary;
   final List<GuestModel> guests;
   final List<VendorModel> vendors;
+  final List<LogisticItemModel> logistics;
 
   CollectionModel copyWith({
     bool? isFavourite,
@@ -112,6 +114,7 @@ class CollectionModel {
     List<ItineraryDayModel>? itinerary,
     List<GuestModel>? guests,
     List<VendorModel>? vendors,
+    List<LogisticItemModel>? logistics,
   }) =>
       CollectionModel(
         id: id,
@@ -130,6 +133,7 @@ class CollectionModel {
         itinerary: itinerary ?? this.itinerary,
         guests: guests ?? this.guests,
         vendors: vendors ?? this.vendors,
+        logistics: logistics ?? this.logistics,
       );
 }
 
@@ -284,6 +288,64 @@ class VendorModel {
         cost: cost ?? this.cost,
         dueDate: dueDate ?? this.dueDate,
         status: status ?? this.status,
+      );
+}
+
+enum LogisticsType { transport, flight, stay, experience }
+
+enum LogisticsStatus { pending, booked, enRoute, arrived }
+
+class LogisticItemModel {
+  const LogisticItemModel({
+    required this.id,
+    required this.title,
+    required this.type,
+    required this.provider,
+    required this.location,
+    required this.reference,
+    required this.start,
+    required this.end,
+    this.status = LogisticsStatus.pending,
+    this.note = '',
+    this.cost = 0,
+  });
+
+  final String id;
+  final String title;
+  final LogisticsType type;
+  final String provider;
+  final String location;
+  final String reference;
+  final DateTime start;
+  final DateTime end;
+  final LogisticsStatus status;
+  final String note;
+  final double cost;
+
+  LogisticItemModel copyWith({
+    String? title,
+    LogisticsType? type,
+    String? provider,
+    String? location,
+    String? reference,
+    DateTime? start,
+    DateTime? end,
+    LogisticsStatus? status,
+    String? note,
+    double? cost,
+  }) =>
+      LogisticItemModel(
+        id: id,
+        title: title ?? this.title,
+        type: type ?? this.type,
+        provider: provider ?? this.provider,
+        location: location ?? this.location,
+        reference: reference ?? this.reference,
+        start: start ?? this.start,
+        end: end ?? this.end,
+        status: status ?? this.status,
+        note: note ?? this.note,
+        cost: cost ?? this.cost,
       );
 }
 
@@ -507,6 +569,129 @@ class DummyData {
               tag: ItineraryTags.tech,
             ),
           ],
+        ),
+      ],
+      logistics: [
+        LogisticItemModel(
+          id: 'c1log1',
+          title: 'Convoy meetup',
+          provider: 'Desert Wheels',
+          type: LogisticsType.transport,
+          location: 'Dubai → Al Marmoom',
+          reference: 'DW-904',
+          start: DateTime.now().add(const Duration(days: 5, hours: 2)),
+          end: DateTime.now().add(const Duration(days: 5, hours: 4)),
+          status: LogisticsStatus.booked,
+          note: 'Gather jeeps, radios, and hydration packs.',
+          cost: 1200,
+        ),
+        LogisticItemModel(
+          id: 'c1log2',
+          title: 'Camp setup',
+          provider: 'Nomad Shelters',
+          type: LogisticsType.stay,
+          location: 'Al Marmoom oasis',
+          reference: 'NS-220',
+          start: DateTime.now().add(const Duration(days: 5, hours: 6)),
+          end: DateTime.now().add(const Duration(days: 6, hours: 8)),
+          status: LogisticsStatus.pending,
+          note: 'Double-check cooling fans + lantern grid.',
+          cost: 800,
+        ),
+        LogisticItemModel(
+          id: 'c1log3',
+          title: 'Sunrise drone shuttle',
+          provider: 'Skyline Drones',
+          type: LogisticsType.experience,
+          location: 'Dune ridge launchpad',
+          reference: 'SD-118',
+          start: DateTime.now().add(const Duration(days: 6, hours: 5)),
+          end: DateTime.now().add(const Duration(days: 6, hours: 7)),
+          status: LogisticsStatus.enRoute,
+          note: 'Pilot briefing before takeoff.',
+          cost: 650,
+        ),
+      ],
+      logistics: [
+        LogisticItemModel(
+          id: 'c2log1',
+          title: 'Artist flight',
+          provider: 'Royal Wings',
+          type: LogisticsType.flight,
+          location: 'Beirut → Amman',
+          reference: 'RW-771',
+          start: DateTime.now().add(const Duration(days: 17, hours: 8)),
+          end: DateTime.now().add(const Duration(days: 17, hours: 11)),
+          status: LogisticsStatus.booked,
+          note: 'Add trio instruments as fragile luggage.',
+          cost: 1450,
+        ),
+        LogisticItemModel(
+          id: 'c2log2',
+          title: 'Suite check-in',
+          provider: 'Amman Loft Hotel',
+          type: LogisticsType.stay,
+          location: 'Amman Downtown',
+          reference: 'ALH-33',
+          start: DateTime.now().add(const Duration(days: 18, hours: 12)),
+          end: DateTime.now().add(const Duration(days: 20)),
+          status: LogisticsStatus.pending,
+          note: 'Deliver welcome amenity with projection map.',
+          cost: 2100,
+        ),
+        LogisticItemModel(
+          id: 'c2log3',
+          title: 'Guest shuttle',
+          provider: 'Velvet Rides',
+          type: LogisticsType.transport,
+          location: 'Hotels → Venue',
+          reference: 'VR-554',
+          start: DateTime.now().add(const Duration(days: 19, hours: 16)),
+          end: DateTime.now().add(const Duration(days: 19, hours: 18)),
+          status: LogisticsStatus.booked,
+          note: 'Hold signage with Nuviq gradients.',
+          cost: 500,
+        ),
+      ],
+      logistics: [
+        LogisticItemModel(
+          id: 'c3log1',
+          title: 'Rooftop freight elevator',
+          provider: 'SkyLift',
+          type: LogisticsType.transport,
+          location: 'Basement → Rooftop',
+          reference: 'SL-221',
+          start: DateTime.now().add(const Duration(days: 1, hours: 10)),
+          end: DateTime.now().add(const Duration(days: 1, hours: 13)),
+          status: LogisticsStatus.enRoute,
+          note: 'Stage rig + LED columns batch 1.',
+          cost: 600,
+        ),
+        LogisticItemModel(
+          id: 'c3log2',
+          title: 'Secret DJ arrival',
+          provider: 'Midnight Jet',
+          type: LogisticsType.flight,
+          location: 'Dubai → Riyadh',
+          reference: 'MJ-992',
+          start: DateTime.now().add(const Duration(days: 1, hours: 14)),
+          end: DateTime.now().add(const Duration(days: 1, hours: 16)),
+          status: LogisticsStatus.booked,
+          note: 'Need VIP escort at gate 3.',
+          cost: 980,
+        ),
+        LogisticItemModel(
+          id: 'c3log3',
+          title: 'Afterparty suites',
+          provider: 'Glow Hotel',
+          type: LogisticsType.stay,
+          location: 'Riyadh Center',
+          reference: 'GH-55',
+          start: DateTime.now().add(const Duration(days: 2)),
+          end: DateTime.now().add(const Duration(days: 3)),
+          status: LogisticsStatus.pending,
+          note: 'Request neon welcome amenity.',
+          cost: 1300,
         ),
       ],
       vendors: [

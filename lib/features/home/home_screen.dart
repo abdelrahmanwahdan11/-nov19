@@ -42,6 +42,7 @@ class HomeScreen extends StatelessWidget {
         final itineraryPeek = controllers.collectionsController.upcomingItinerarySlots(4);
         final guestFollowUps = controllers.collectionsController.pendingGuests(5);
         final vendorFollowUps = controllers.collectionsController.vendorFollowUps(5);
+        final logisticsPeek = controllers.collectionsController.upcomingLogistics(5);
         final unread = controllers.notificationsController.unreadCount;
         return RefreshIndicator(
           onRefresh: controllers.collectionsController.refresh,
@@ -306,6 +307,60 @@ class HomeScreen extends StatelessWidget {
                                 .updateVendorStatus(entry.collection.id, entry.vendor.id, nextStatus),
                         onOpen: () => Navigator.of(context)
                             .pushNamed('/collection_vendors', arguments: entry.collection.id),
+                      );
+                    },
+                  ),
+                ),
+              ],
+              if (logisticsPeek.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(localization.t('logisticsFollowUps'),
+                          style: Theme.of(context).textTheme.titleMedium),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed('/collection_logistics', arguments: logisticsPeek.first.collection.id),
+                      child: Text(localization.t('logisticsOpenList')),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 190,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: logisticsPeek.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (_, index) {
+                      final entry = logisticsPeek[index];
+                      LogisticsStatus? nextStatus;
+                      switch (entry.item.status) {
+                        case LogisticsStatus.pending:
+                          nextStatus = LogisticsStatus.booked;
+                          break;
+                        case LogisticsStatus.booked:
+                          nextStatus = LogisticsStatus.enRoute;
+                          break;
+                        case LogisticsStatus.enRoute:
+                          nextStatus = LogisticsStatus.arrived;
+                          break;
+                        case LogisticsStatus.arrived:
+                          nextStatus = null;
+                          break;
+                      }
+                      return _LogisticsFollowUpCard(
+                        collection: entry.collection,
+                        logistic: entry.item,
+                        localization: localization,
+                        onAdvance: nextStatus == null
+                            ? null
+                            : () => controllers.collectionsController
+                                .updateLogisticStatus(entry.collection.id, entry.item.id, nextStatus),
+                        onOpen: () => Navigator.of(context)
+                            .pushNamed('/collection_logistics', arguments: entry.collection.id),
                       );
                     },
                   ),
@@ -660,6 +715,122 @@ class _VendorFollowUpCard extends StatelessWidget {
       default:
         return Colors.blueGrey.withOpacity(0.2);
     }
+  }
+}
+
+class _LogisticsFollowUpCard extends StatelessWidget {
+  const _LogisticsFollowUpCard({
+    required this.collection,
+    required this.logistic,
+    required this.localization,
+    required this.onOpen,
+    this.onAdvance,
+  });
+
+  final CollectionModel collection;
+  final LogisticItemModel logistic;
+  final AppLocalizations localization;
+  final VoidCallback? onAdvance;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final formatter = MaterialLocalizations.of(context);
+    final date = formatter.formatMediumDate(logistic.start);
+    final time = formatter.formatTimeOfDay(TimeOfDay.fromDateTime(logistic.start));
+    final theme = Theme.of(context);
+    return Container(
+      width: 250,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        color: theme.cardColor.withOpacity(0.95),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(collection.title, style: theme.textTheme.titleSmall),
+          const SizedBox(height: 4),
+          Text(logistic.title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Text('${logistic.provider} · ${logistic.location}',
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(_typeIcon(logistic.type), size: 18, color: theme.primaryColor),
+              const SizedBox(width: 6),
+              Text('$date · $time', style: theme.textTheme.bodySmall),
+            ],
+          ),
+          const Spacer(),
+          Row(
+            children: [
+              _LogisticsStatusChip(status: logistic.status),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(IconlyLight.arrow_right_2),
+                onPressed: onOpen,
+              ),
+            ],
+          ),
+          if (onAdvance != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: onAdvance,
+                child: Text(localization.t('logisticsAdvance')),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  IconData _typeIcon(LogisticsType type) {
+    switch (type) {
+      case LogisticsType.transport:
+        return IconlyLight.car;
+      case LogisticsType.flight:
+        return IconlyLight.paper_plane;
+      case LogisticsType.stay:
+        return IconlyLight.home;
+      case LogisticsType.experience:
+        return IconlyLight.activity;
+    }
+  }
+}
+
+class _LogisticsStatusChip extends StatelessWidget {
+  const _LogisticsStatusChip({required this.status});
+
+  final LogisticsStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context);
+    final label = switch (status) {
+      LogisticsStatus.pending => localization.t('logisticsStatusPending'),
+      LogisticsStatus.booked => localization.t('logisticsStatusBooked'),
+      LogisticsStatus.enRoute => localization.t('logisticsStatusEnRoute'),
+      LogisticsStatus.arrived => localization.t('logisticsStatusArrived'),
+    };
+    final color = switch (status) {
+      LogisticsStatus.pending => Colors.orange,
+      LogisticsStatus.booked => Colors.blue,
+      LogisticsStatus.enRoute => Colors.amber,
+      LogisticsStatus.arrived => Colors.green,
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: color.withOpacity(0.2),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color, fontWeight: FontWeight.bold),
+      ),
+    );
   }
 }
 
