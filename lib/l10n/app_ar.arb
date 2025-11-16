@@ -126,5 +126,21 @@
   "tapCycleStatus": "اضغط لتغيير الحالة",
   "roadmapHint": "رشّح وحدث المعالم لإبقاء الفريق متزامناً.",
   "nextMilestones": "المعالم القادمة",
-  "overBudgetOnly": "المتجاوز للميزانية فقط"
+  "overBudgetOnly": "المتجاوز للميزانية فقط",
+  "journal": "مذكرات اللحظات",
+  "journalSubtitle": "سجّل إحساس كل نقطة تلامس ونبرة الفريق.",
+  "recentMemories": "الذكريات الأخيرة",
+  "journalEmpty": "لا توجد لحظات محفوظة",
+  "journalEmptyDescription": "احفظ المزاج والملاحظات لتتابع تطور الحدث.",
+  "addHighlight": "إضافة لحظة",
+  "entryHint": "اكتب ملاحظة سريعة عن الإحساس أو التحديات.",
+  "journalSaved": "تم حفظ اللحظة محلياً",
+  "mood": "المزاج",
+  "moodCalm": "هادئ",
+  "moodExcited": "متحمس",
+  "moodFocused": "مركّز",
+  "todayMood": "متتبع المزاج",
+  "latestHighlights": "أحدث اللحظات",
+  "openJournal": "افتح المذكرات",
+  "title": "العنوان"
 }

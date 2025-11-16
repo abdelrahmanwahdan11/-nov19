@@ -15,6 +15,7 @@ class CollectionModel {
     this.milestones = const [],
     this.isFavourite = false,
     this.tasks = const [],
+    this.journalEntries = const [],
   });
 
   final String id;
@@ -29,6 +30,7 @@ class CollectionModel {
   final List<MilestoneModel> milestones;
   final bool isFavourite;
   final List<TaskModel> tasks;
+  final List<JournalEntryModel> journalEntries;
 
   CollectionModel copyWith({
     bool? isFavourite,
@@ -36,6 +38,7 @@ class CollectionModel {
     double? budgetPlanned,
     double? budgetUsed,
     List<MilestoneModel>? milestones,
+    List<JournalEntryModel>? journalEntries,
   }) =>
       CollectionModel(
         id: id,
@@ -50,6 +53,7 @@ class CollectionModel {
         milestones: milestones ?? this.milestones,
         isFavourite: isFavourite ?? this.isFavourite,
         tasks: tasks ?? this.tasks,
+        journalEntries: journalEntries ?? this.journalEntries,
       );
 }
 
@@ -105,6 +109,26 @@ class MilestoneModel {
         date: date,
         status: status ?? this.status,
       );
+}
+
+enum JournalMood { excited, calm, focused }
+
+class JournalEntryModel {
+  const JournalEntryModel({
+    required this.id,
+    required this.title,
+    required this.note,
+    required this.date,
+    required this.mood,
+    required this.image,
+  });
+
+  final String id;
+  final String title;
+  final String note;
+  final DateTime date;
+  final JournalMood mood;
+  final String image;
 }
 
 class GalleryItem {
@@ -215,6 +239,24 @@ class DummyData {
           date: DateTime.now().add(const Duration(days: 5)),
         ),
       ],
+      journalEntries: [
+        JournalEntryModel(
+          id: 'j1',
+          title: 'Dawn scouting',
+          note: 'Tested dune entry before sunrise and mapped camel break spots.',
+          date: DateTime.now().subtract(const Duration(hours: 8)),
+          mood: JournalMood.excited,
+          image: AppAssets.onboarding1,
+        ),
+        JournalEntryModel(
+          id: 'j2',
+          title: 'Menu tasting',
+          note: 'Chef nailed the saffron pancakes, only tweak is more cardamom.',
+          date: DateTime.now().subtract(const Duration(days: 1)),
+          mood: JournalMood.calm,
+          image: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=900&q=80',
+        ),
+      ],
     ),
     CollectionModel(
       id: 'c2',
@@ -265,6 +307,24 @@ class DummyData {
           title: 'Chef tasting',
           subtitle: 'Approve tasting menu + plating',
           date: DateTime.now().add(const Duration(days: 14)),
+        ),
+      ],
+      journalEntries: [
+        JournalEntryModel(
+          id: 'j3',
+          title: 'Projection tests',
+          note: 'Gradient loop looks soft on the brick wall after recalibrating brightness.',
+          date: DateTime.now().subtract(const Duration(days: 2)),
+          mood: JournalMood.focused,
+          image: AppAssets.onboarding2,
+        ),
+        JournalEntryModel(
+          id: 'j4',
+          title: 'Acoustic trio jam',
+          note: 'Band improvised an Arabic lo-fi bridge that fits the dinner reveal.',
+          date: DateTime.now().subtract(const Duration(days: 4)),
+          mood: JournalMood.calm,
+          image: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=900&q=80',
         ),
       ],
     ),
@@ -318,6 +378,24 @@ class DummyData {
           title: 'Secret invite drop',
           subtitle: 'Push AR invites to VIPs',
           date: DateTime.now().add(const Duration(days: 2)),
+        ),
+      ],
+      journalEntries: [
+        JournalEntryModel(
+          id: 'j5',
+          title: 'Permit win',
+          note: 'City official loved the sustainability focus—approval signed instantly.',
+          date: DateTime.now().subtract(const Duration(hours: 3)),
+          mood: JournalMood.excited,
+          image: AppAssets.onboarding3,
+        ),
+        JournalEntryModel(
+          id: 'j6',
+          title: 'Light rehearsal',
+          note: 'Tested neon columns with haze—needs extra diffusion on camera angles.',
+          date: DateTime.now().subtract(const Duration(days: 1)),
+          mood: JournalMood.focused,
+          image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80',
         ),
       ],
     ),

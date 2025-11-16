@@ -126,5 +126,21 @@
   "tapCycleStatus": "Tap to cycle status",
   "roadmapHint": "Filter and update checkpoints to keep every stakeholder aligned.",
   "nextMilestones": "Next milestones",
-  "overBudgetOnly": "Over budget"
+  "overBudgetOnly": "Over budget",
+  "journal": "Moments journal",
+  "journalSubtitle": "Capture mood snapshots for every touch point.",
+  "recentMemories": "Recent memories",
+  "journalEmpty": "No highlights yet",
+  "journalEmptyDescription": "Save the mood of each checkpoint to see the journey evolve.",
+  "addHighlight": "Add highlight",
+  "entryHint": "Write a quick note about the vibe, learning, or blockers.",
+  "journalSaved": "Moment saved locally",
+  "mood": "Mood",
+  "moodCalm": "Calm",
+  "moodExcited": "Excited",
+  "moodFocused": "Focused",
+  "todayMood": "Mood tracker",
+  "latestHighlights": "Latest highlights",
+  "openJournal": "Open journal",
+  "title": "Title"
 }

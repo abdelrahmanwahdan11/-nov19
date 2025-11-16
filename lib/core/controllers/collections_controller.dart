@@ -49,6 +49,7 @@ class CollectionsController extends ChangeNotifier {
 
   List<TaskModel> tasksFor(String id) => byId(id).tasks;
   List<MilestoneModel> milestonesFor(String id) => byId(id).milestones;
+  List<JournalEntryModel> journalFor(String id) => byId(id).journalEntries;
 
   double budgetProgress(String id) {
     final collection = byId(id);
@@ -139,6 +140,33 @@ class CollectionsController extends ChangeNotifier {
       return milestone.copyWith(status: next);
     }).toList();
     _replaceCollection(collection.copyWith(milestones: updated));
+  }
+
+  void addJournalEntry(String collectionId, JournalEntryModel entry) {
+    final collection = byId(collectionId);
+    final updatedEntries = [...collection.journalEntries, entry]
+      ..sort((a, b) => b.date.compareTo(a.date));
+    _replaceCollection(collection.copyWith(journalEntries: updatedEntries));
+  }
+
+  Map<JournalMood, int> journalMoodSummary(String collectionId) {
+    final entries = journalFor(collectionId);
+    final map = {for (final mood in JournalMood.values) mood: 0};
+    for (final entry in entries) {
+      map[entry.mood] = (map[entry.mood] ?? 0) + 1;
+    }
+    return map;
+  }
+
+  List<({CollectionModel collection, JournalEntryModel entry})> recentJournalEntries([int take = 6]) {
+    final combined = <({CollectionModel collection, JournalEntryModel entry})>[];
+    for (final collection in DummyData.collections) {
+      for (final entry in collection.journalEntries) {
+        combined.add((collection: collection, entry: entry));
+      }
+    }
+    combined.sort((a, b) => b.entry.date.compareTo(a.entry.date));
+    return combined.take(take).toList();
   }
 
   Map<DateTime, List<TaskModel>> groupedTasks(String collectionId) {

@@ -234,6 +234,8 @@ class _SummaryTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
+        _JournalPeekCard(collectionId: collection.id),
+        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
@@ -338,6 +340,76 @@ class _InfoRow extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _JournalPeekCard extends StatelessWidget {
+  const _JournalPeekCard({required this.collectionId});
+
+  final String collectionId;
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context);
+    final controller = AppScope.of(context).collectionsController;
+    final entries = controller.journalFor(collectionId);
+    final latest = entries.isNotEmpty ? entries.first : null;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        color: Theme.of(context).cardTheme.color,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(localization.t('latestHighlights'),
+                    style: Theme.of(context).textTheme.titleMedium),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context)
+                    .pushNamed('/collection_journal', arguments: collectionId),
+                child: Text(localization.t('openJournal')),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (latest == null)
+            Text(localization.t('journalEmptyDescription'))
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(latest.title, style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 4),
+                Text(latest.note, maxLines: 2, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 12,
+                  children: [
+                    Chip(label: Text('${localization.t('mood')}: ${_moodLabel(localization, latest.mood)}')),
+                    Chip(label: Text('${latest.date.day}/${latest.date.month}')),
+                  ],
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  String _moodLabel(AppLocalizations localization, JournalMood mood) {
+    switch (mood) {
+      case JournalMood.calm:
+        return localization.t('moodCalm');
+      case JournalMood.focused:
+        return localization.t('moodFocused');
+      default:
+        return localization.t('moodExcited');
+    }
   }
 }
 

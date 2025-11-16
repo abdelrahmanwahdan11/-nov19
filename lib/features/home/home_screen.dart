@@ -31,6 +31,7 @@ class HomeScreen extends StatelessWidget {
               IconlyBold.heart),
         ];
         final timeline = controllers.collectionsController.upcomingTimeline(4);
+        final highlights = controllers.collectionsController.recentJournalEntries();
         final totalBudgetPlanned = controllers.collectionsController.totalBudgetPlanned;
         final totalBudgetUsed = controllers.collectionsController.totalBudgetUsed;
         final budgetProgress = totalBudgetPlanned == 0
@@ -202,6 +203,35 @@ class HomeScreen extends StatelessWidget {
                         ),
                       )
                       .toList(),
+                ),
+              ],
+              if (highlights.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(localization.t('latestHighlights'),
+                          style: Theme.of(context).textTheme.titleMedium),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed('/collection_journal', arguments: highlights.first.collection.id),
+                      child: Text(localization.t('openJournal')),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 210,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: highlights.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (_, index) {
+                      final item = highlights[index];
+                      return _JournalHighlightCard(entry: item);
+                    },
+                  ),
                 ),
               ],
               if (milestonePeek.isNotEmpty) ...[
@@ -536,6 +566,69 @@ class _MilestoneTile extends StatelessWidget {
         return localization.t('statusDone');
       default:
         return localization.t('statusPlanned');
+    }
+  }
+}
+
+class _JournalHighlightCard extends StatelessWidget {
+  const _JournalHighlightCard({required this.entry});
+
+  final ({CollectionModel collection, JournalEntryModel entry}) entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context);
+    final journal = entry.entry;
+    return GestureDetector(
+      onTap: () => Navigator.of(context)
+          .pushNamed('/collection_journal', arguments: entry.collection.id),
+      child: Container(
+        width: 220,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          color: Theme.of(context).cardTheme.color,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Image.network(journal.image, height: 110, width: double.infinity, fit: BoxFit.cover),
+            ),
+            const SizedBox(height: 8),
+            Text(entry.collection.title, style: Theme.of(context).textTheme.labelSmall),
+            Text(journal.title,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Text(journal.note, maxLines: 2, overflow: TextOverflow.ellipsis),
+            const Spacer(),
+            Row(
+              children: [
+                Chip(
+                  label: Text(_moodLabel(localization, journal.mood)),
+                  backgroundColor: Theme.of(context).primaryColor.withOpacity(0.15),
+                  labelStyle: TextStyle(color: Theme.of(context).primaryColor),
+                ),
+                const Spacer(),
+                Text('${journal.date.day}/${journal.date.month}',
+                    style: Theme.of(context).textTheme.labelSmall),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _moodLabel(AppLocalizations localization, JournalMood mood) {
+    switch (mood) {
+      case JournalMood.calm:
+        return localization.t('moodCalm');
+      case JournalMood.focused:
+        return localization.t('moodFocused');
+      default:
+        return localization.t('moodExcited');
     }
   }
 }
