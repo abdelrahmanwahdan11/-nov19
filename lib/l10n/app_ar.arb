@@ -191,5 +191,26 @@
   ,"tagExperience": "تجربة"
   ,"tagCulinary": "ضيافة"
   ,"tagWellness": "عافية"
-  ,"tagTech": "تقني"
+  ,"tagTech": "تقني",
+  "guestList": "قائمة الضيوف",
+  "guestAdd": "إضافة ضيف",
+  "guestRole": "الدور",
+  "guestContact": "وسيلة التواصل",
+  "guestOverview": "ملخص الدعوات",
+  "guestStatusInvited": "مدعو",
+  "guestStatusConfirmed": "مؤكد",
+  "guestStatusTentative": "قيد التأكيد",
+  "guestStatusDeclined": "معتذر",
+  "guestPending": "بانتظار الرد",
+  "guestFilterAll": "كل الحالات",
+  "guestSearch": "بحث عن الضيوف",
+  "guestEmpty": "لا يوجد ضيوف بعد",
+  "guestEmptyDescription": "أضف المدعوين لإدارة الردود محلياً.",
+  "guestSaved": "تم حفظ الضيف محلياً",
+  "guestPeekTitle": "الضيوف",
+  "guestPeekSubtitle": "راقب حالة الدعوات دون مغادرة الشاشة.",
+  "guestOpenList": "فتح الضيوف",
+  "guestFollowups": "متابعة الضيوف",
+  "guestMarkConfirmed": "تأكيد الحضور",
+  "guestTopGuests": "ضيوف مميزون"
 }

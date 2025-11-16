@@ -191,5 +191,26 @@
   ,"tagExperience": "Experience"
   ,"tagCulinary": "Culinary"
   ,"tagWellness": "Wellness"
-  ,"tagTech": "Tech"
+  ,"tagTech": "Tech",
+  "guestList": "Guest list",
+  "guestAdd": "Add guest",
+  "guestRole": "Role",
+  "guestContact": "Contact",
+  "guestOverview": "Invite overview",
+  "guestStatusInvited": "Invited",
+  "guestStatusConfirmed": "Confirmed",
+  "guestStatusTentative": "Tentative",
+  "guestStatusDeclined": "Declined",
+  "guestPending": "Pending",
+  "guestFilterAll": "All statuses",
+  "guestSearch": "Search guests",
+  "guestEmpty": "No guests yet",
+  "guestEmptyDescription": "Add invitees to manage RSVPs locally.",
+  "guestSaved": "Guest saved locally",
+  "guestPeekTitle": "Guests",
+  "guestPeekSubtitle": "Keep RSVP health updated without leaving the screen.",
+  "guestOpenList": "Open guests",
+  "guestFollowups": "Guest follow-ups",
+  "guestMarkConfirmed": "Mark confirmed",
+  "guestTopGuests": "Spotlight"
 }

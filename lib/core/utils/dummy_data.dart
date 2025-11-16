@@ -81,6 +81,7 @@ class CollectionModel {
     this.tasks = const [],
     this.journalEntries = const [],
     this.itinerary = const [],
+    this.guests = const [],
   });
 
   final String id;
@@ -97,6 +98,7 @@ class CollectionModel {
   final List<TaskModel> tasks;
   final List<JournalEntryModel> journalEntries;
   final List<ItineraryDayModel> itinerary;
+  final List<GuestModel> guests;
 
   CollectionModel copyWith({
     bool? isFavourite,
@@ -106,6 +108,7 @@ class CollectionModel {
     List<MilestoneModel>? milestones,
     List<JournalEntryModel>? journalEntries,
     List<ItineraryDayModel>? itinerary,
+    List<GuestModel>? guests,
   }) =>
       CollectionModel(
         id: id,
@@ -122,6 +125,7 @@ class CollectionModel {
         tasks: tasks ?? this.tasks,
         journalEntries: journalEntries ?? this.journalEntries,
         itinerary: itinerary ?? this.itinerary,
+        guests: guests ?? this.guests,
       );
 }
 
@@ -197,6 +201,42 @@ class JournalEntryModel {
   final DateTime date;
   final JournalMood mood;
   final String image;
+}
+
+enum GuestStatus { invited, confirmed, tentative, declined }
+
+class GuestModel {
+  const GuestModel({
+    required this.id,
+    required this.name,
+    required this.role,
+    required this.contact,
+    required this.avatar,
+    this.status = GuestStatus.invited,
+  });
+
+  final String id;
+  final String name;
+  final String role;
+  final String contact;
+  final String avatar;
+  final GuestStatus status;
+
+  GuestModel copyWith({
+    String? name,
+    String? role,
+    String? contact,
+    String? avatar,
+    GuestStatus? status,
+  }) =>
+      GuestModel(
+        id: id,
+        name: name ?? this.name,
+        role: role ?? this.role,
+        contact: contact ?? this.contact,
+        avatar: avatar ?? this.avatar,
+        status: status ?? this.status,
+      );
 }
 
 class GalleryItem {
@@ -323,6 +363,40 @@ class DummyData {
           date: DateTime.now().subtract(const Duration(days: 1)),
           mood: JournalMood.calm,
           image: 'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=900&q=80',
+        ),
+      ],
+      guests: const [
+        GuestModel(
+          id: 'g1',
+          name: 'Laila Hassan',
+          role: 'Logistics lead',
+          contact: '+971 55 200 1122',
+          avatar: 'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=200&q=80',
+          status: GuestStatus.confirmed,
+        ),
+        GuestModel(
+          id: 'g2',
+          name: 'Omar Nasser',
+          role: 'Drone pilot',
+          contact: '+971 50 334 4422',
+          avatar: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=200&q=80',
+          status: GuestStatus.confirmed,
+        ),
+        GuestModel(
+          id: 'g3',
+          name: 'Sara Qamar',
+          role: 'Experience guest',
+          contact: 'sara@nuviq.app',
+          avatar: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=200&q=80',
+          status: GuestStatus.tentative,
+        ),
+        GuestModel(
+          id: 'g4',
+          name: 'Jad Farah',
+          role: 'Chef liaison',
+          contact: '+971 55 199 8733',
+          avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80',
+          status: GuestStatus.invited,
         ),
       ],
       itinerary: [
@@ -457,6 +531,40 @@ class DummyData {
           image: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=900&q=80',
         ),
       ],
+      guests: const [
+        GuestModel(
+          id: 'g5',
+          name: 'Maya Rahman',
+          role: 'Host',
+          contact: 'maya@nuviq.app',
+          avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80',
+          status: GuestStatus.confirmed,
+        ),
+        GuestModel(
+          id: 'g6',
+          name: 'Yousef Ghannam',
+          role: 'Projection artist',
+          contact: '+962 79 444 2211',
+          avatar: 'https://images.unsplash.com/photo-1504593811423-6dd665756598?auto=format&fit=crop&w=200&q=80',
+          status: GuestStatus.tentative,
+        ),
+        GuestModel(
+          id: 'g7',
+          name: 'Reem Awwad',
+          role: 'VIP guest',
+          contact: 'reem@nuviq.app',
+          avatar: 'https://images.unsplash.com/photo-1544723795-432537f7794d?auto=format&fit=crop&w=200&q=80',
+          status: GuestStatus.invited,
+        ),
+        GuestModel(
+          id: 'g8',
+          name: 'Tareq Halabi',
+          role: 'Acoustic trio',
+          contact: '+962 78 555 9011',
+          avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
+          status: GuestStatus.confirmed,
+        ),
+      ],
       itinerary: [
         ItineraryDayModel(
           id: 'c2d1',
@@ -588,6 +696,40 @@ class DummyData {
           date: DateTime.now().subtract(const Duration(days: 1)),
           mood: JournalMood.focused,
           image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80',
+        ),
+      ],
+      guests: const [
+        GuestModel(
+          id: 'g9',
+          name: 'Hani Al Amer',
+          role: 'Permit lead',
+          contact: '+966 54 330 2111',
+          avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80',
+          status: GuestStatus.confirmed,
+        ),
+        GuestModel(
+          id: 'g10',
+          name: 'Layth Zidan',
+          role: 'Music director',
+          contact: '+966 59 811 9088',
+          avatar: 'https://images.unsplash.com/photo-1544723795-432537f7794d?auto=format&fit=crop&w=200&q=80',
+          status: GuestStatus.confirmed,
+        ),
+        GuestModel(
+          id: 'g11',
+          name: 'Noor Alia',
+          role: 'Influencer guest',
+          contact: 'noor@nuviq.app',
+          avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80',
+          status: GuestStatus.tentative,
+        ),
+        GuestModel(
+          id: 'g12',
+          name: 'Rami Abdel',
+          role: 'Production',
+          contact: '+966 58 399 9980',
+          avatar: 'https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=200&q=80',
+          status: GuestStatus.invited,
         ),
       ],
       itinerary: [

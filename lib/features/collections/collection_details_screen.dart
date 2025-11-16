@@ -192,6 +192,10 @@ class _SummaryTab extends StatelessWidget {
             ],
           ),
         ),
+        if (collection.guests.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _GuestPeekCard(collectionId: collection.id),
+        ],
         if (itinerary.isNotEmpty) ...[
           const SizedBox(height: 16),
           Row(
@@ -345,6 +349,93 @@ class _BudgetStat extends StatelessWidget {
       children: [
         Text(value, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white)),
         Text(label, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.white70)),
+      ],
+    );
+  }
+}
+
+class _GuestPeekCard extends StatelessWidget {
+  const _GuestPeekCard({required this.collectionId});
+
+  final String collectionId;
+
+  @override
+  Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context);
+    final controller = AppScope.of(context).collectionsController;
+    final guests = controller.guestsFor(collectionId);
+    final summary = controller.guestStatusSummary(collectionId);
+    final confirmed = summary[GuestStatus.confirmed] ?? 0;
+    final pending = (summary[GuestStatus.invited] ?? 0) + (summary[GuestStatus.tentative] ?? 0);
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        color: Theme.of(context).cardTheme.color,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(localization.t('guestPeekTitle'), style: Theme.of(context).textTheme.titleMedium)),
+              TextButton.icon(
+                onPressed: () => Navigator.of(context)
+                    .pushNamed('/collection_guests', arguments: collectionId),
+                icon: const Icon(IconlyLight.user),
+                label: Text(localization.t('guestOpenList')),
+              )
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(localization.t('guestPeekSubtitle')), 
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _GuestSummaryStat(
+                  label: localization.t('guestStatusConfirmed'),
+                  value: '$confirmed',
+                ),
+              ),
+              Expanded(
+                child: _GuestSummaryStat(
+                  label: localization.t('guestPending'),
+                  value: '$pending',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: guests.take(3).map((guest) {
+              return Chip(
+                avatar: CircleAvatar(backgroundImage: NetworkImage(guest.avatar)),
+                label: Text(guest.name),
+              );
+            }).toList(),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class _GuestSummaryStat extends StatelessWidget {
+  const _GuestSummaryStat({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(value, style: Theme.of(context).textTheme.headlineSmall),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }

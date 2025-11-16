@@ -40,6 +40,7 @@ class HomeScreen extends StatelessWidget {
             : (totalBudgetUsed / totalBudgetPlanned).clamp(0, 1);
         final milestonePeek = controllers.collectionsController.upcomingMilestones(3);
         final itineraryPeek = controllers.collectionsController.upcomingItinerarySlots(4);
+        final guestFollowUps = controllers.collectionsController.pendingGuests(5);
         final unread = controllers.notificationsController.unreadCount;
         return RefreshIndicator(
           onRefresh: controllers.collectionsController.refresh,
@@ -218,6 +219,43 @@ class HomeScreen extends StatelessWidget {
                       .toList(),
                 ),
               ],
+              if (guestFollowUps.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child:
+                          Text(localization.t('guestFollowups'), style: Theme.of(context).textTheme.titleMedium),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed('/collection_guests', arguments: guestFollowUps.first.collection.id),
+                      child: Text(localization.t('guestOpenList')),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 200,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: guestFollowUps.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (_, index) {
+                      final entry = guestFollowUps[index];
+                      return _GuestFollowUpCard(
+                        collection: entry.collection,
+                        guest: entry.guest,
+                        localization: localization,
+                        onConfirm: () => controllers.collectionsController
+                            .updateGuestStatus(entry.collection.id, entry.guest.id, GuestStatus.confirmed),
+                        onOpen: () => Navigator.of(context)
+                            .pushNamed('/collection_guests', arguments: entry.collection.id),
+                      );
+                    },
+                  ),
+                ),
+              ],
               if (itineraryPeek.isNotEmpty) ...[
                 const SizedBox(height: 24),
                 Row(
@@ -360,6 +398,92 @@ class _QuickCard extends StatelessWidget {
   }
 }
 
+class _GuestFollowUpCard extends StatelessWidget {
+  const _GuestFollowUpCard({
+    required this.collection,
+    required this.guest,
+    required this.localization,
+    required this.onConfirm,
+    required this.onOpen,
+  });
+
+  final CollectionModel collection;
+  final GuestModel guest;
+  final AppLocalizations localization;
+  final VoidCallback onConfirm;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 230,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        color: Theme.of(context).cardTheme.color,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(backgroundImage: NetworkImage(guest.avatar), radius: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(guest.name, style: Theme.of(context).textTheme.titleSmall),
+                    Text(collection.title,
+                        style: Theme.of(context).textTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ],
+                ),
+              )
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(guest.role, maxLines: 1, overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 8),
+          Chip(
+            label: Text(_statusLabel(localization, guest.status)),
+            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.15),
+          ),
+          const Spacer(),
+          Row(
+            children: [
+              IconButton(
+                onPressed: onOpen,
+                icon: const Icon(IconlyLight.setting),
+                tooltip: localization.t('guestOpenList'),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: onConfirm,
+                  child: Text(localization.t('guestMarkConfirmed')),
+                ),
+              )
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  String _statusLabel(AppLocalizations localization, GuestStatus status) {
+    switch (status) {
+      case GuestStatus.confirmed:
+        return localization.t('guestStatusConfirmed');
+      case GuestStatus.tentative:
+        return localization.t('guestStatusTentative');
+      case GuestStatus.declined:
+        return localization.t('guestStatusDeclined');
+      default:
+        return localization.t('guestStatusInvited');
+    }
+  }
+}
+
 class _CollectionCard extends StatelessWidget {
   const _CollectionCard({required this.collection});
 
@@ -373,6 +497,9 @@ class _CollectionCard extends StatelessWidget {
     final completed = collection.tasks.where((task) => task.completed).length;
     final progress = totalTasks == 0 ? 0.0 : completed / totalTasks;
     final nextSlot = controller.nextItinerarySlot(collection.id);
+    final guestSummary = controller.guestStatusSummary(collection.id);
+    final totalGuests = collection.guests.length;
+    final confirmedGuests = guestSummary[GuestStatus.confirmed] ?? 0;
     final timeLabel = nextSlot == null
         ? null
         : MaterialLocalizations.of(context).formatTimeOfDay(nextSlot.slot.time);
@@ -436,6 +563,26 @@ class _CollectionCard extends StatelessWidget {
                       ),
                     )
                   ],
+                  if (totalGuests > 0) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(IconlyLight.user, size: 16),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            '$confirmedGuests / $totalGuests ${localization.t('guestStatusConfirmed')}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () =>
+                              Navigator.of(context).pushNamed('/collection_guests', arguments: collection.id),
+                          child: Text(localization.t('guestOpenList')),
+                        )
+                      ],
+                    ),
+                  ]
                 ],
               ),
             )

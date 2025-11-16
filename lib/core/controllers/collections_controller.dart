@@ -51,6 +51,18 @@ class CollectionsController extends ChangeNotifier {
   List<MilestoneModel> milestonesFor(String id) => byId(id).milestones;
   List<JournalEntryModel> journalFor(String id) => byId(id).journalEntries;
   List<ItineraryDayModel> itineraryFor(String id) => byId(id).itinerary;
+  List<GuestModel> guestsFor(String id) => byId(id).guests;
+
+  Map<GuestStatus, int> guestStatusSummary(String id) {
+    final guests = guestsFor(id);
+    final summary = {for (final status in GuestStatus.values) status: 0};
+    for (final guest in guests) {
+      summary[guest.status] = (summary[guest.status] ?? 0) + 1;
+    }
+    return summary;
+  }
+
+  int confirmedGuests(String id) => guestStatusSummary(id)[GuestStatus.confirmed] ?? 0;
 
   double budgetProgress(String id) {
     final collection = byId(id);
@@ -223,6 +235,20 @@ class CollectionsController extends ChangeNotifier {
     _replaceCollection(collection.copyWith(journalEntries: updatedEntries));
   }
 
+  void updateGuestStatus(String collectionId, String guestId, GuestStatus status) {
+    final collection = byId(collectionId);
+    final updatedGuests = collection.guests
+        .map((guest) => guest.id == guestId ? guest.copyWith(status: status) : guest)
+        .toList();
+    _replaceCollection(collection.copyWith(guests: updatedGuests));
+  }
+
+  void addGuest(String collectionId, GuestModel guest) {
+    final collection = byId(collectionId);
+    final updatedGuests = [...collection.guests, guest];
+    _replaceCollection(collection.copyWith(guests: updatedGuests));
+  }
+
   Map<JournalMood, int> journalMoodSummary(String collectionId) {
     final entries = journalFor(collectionId);
     final map = {for (final mood in JournalMood.values) mood: 0};
@@ -389,4 +415,16 @@ class CollectionsController extends ChangeNotifier {
       DateTime(day.date.year, day.date.month, day.date.day, slot.time.hour, slot.time.minute);
 
   int _timeToMinutes(TimeOfDay time) => time.hour * 60 + time.minute;
+
+  List<({CollectionModel collection, GuestModel guest})> pendingGuests([int take = 4]) {
+    final pending = <({CollectionModel collection, GuestModel guest})>[];
+    for (final collection in DummyData.collections) {
+      for (final guest in collection.guests) {
+        if (guest.status == GuestStatus.invited || guest.status == GuestStatus.tentative) {
+          pending.add((collection: collection, guest: guest));
+        }
+      }
+    }
+    return pending.take(take).toList();
+  }
 }
